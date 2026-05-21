@@ -1,0 +1,32 @@
+# Local scientific corpora and outputs — must NOT ship to Vercel.
+# These can contain copyrighted PDFs or private analysis results.
+Articulos/
+outputs/
+salidas_contexto_contaminantes/
+
+# Document binaries (Word, Excel, PowerPoint).
+*.pdf
+*.docx
+*.xlsx
+*.xlsm
+*.pptx
+
+# Python runtime artifacts (the pipeline is local-only on Vercel anyway).
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Build caches that should never travel with the source upload.
+.next/
+node_modules/
+out/
+coverage/
+
+# Local environment files.
+.env
+.env.local
+.env.*.local
+
+# macOS clutter.
+.DS_Store

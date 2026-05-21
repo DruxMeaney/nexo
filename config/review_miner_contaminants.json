@@ -1,0 +1,322 @@
+{
+  "version": "1.0",
+  "description": "Controlled bilingual lexicon for environmental contaminants in scientific literature. Patterns are regular expressions evaluated case-insensitively.",
+  "entities": [
+    {
+      "id": "lead",
+      "label_es": "plomo",
+      "label_en": "lead",
+      "category": "Metales pesados",
+      "generic": false,
+      "patterns": [
+        "\\bplomo\\b",
+        "\\bpb\\b",
+        "\\blead\\s+(acetate|exposure|poisoning|levels?|concentrations?|contamination|compounds?|neurotoxicity|intoxication|treatment)\\b"
+      ]
+    },
+    {
+      "id": "cadmium",
+      "label_es": "cadmio",
+      "label_en": "cadmium",
+      "category": "Metales pesados",
+      "generic": false,
+      "patterns": ["\\bcadmio\\b", "\\bcadmium\\b", "\\bcd\\b", "\\bcdcl\\s*2\\b", "\\bcdcl2\\b"]
+    },
+    {
+      "id": "aluminum",
+      "label_es": "aluminio",
+      "label_en": "aluminum/aluminium",
+      "category": "Metales pesados",
+      "generic": false,
+      "patterns": ["\\baluminio\\b", "\\baluminum\\b", "\\baluminium\\b"]
+    },
+    {
+      "id": "arsenic",
+      "label_es": "arsenico",
+      "label_en": "arsenic",
+      "category": "Metales pesados",
+      "generic": false,
+      "patterns": ["\\bars[eé]nico\\b", "\\barsenic\\b", "\\binorganic arsenic\\b", "\\bas\\s*-?mixture\\b"]
+    },
+    {
+      "id": "mercury",
+      "label_es": "mercurio",
+      "label_en": "mercury",
+      "category": "Metales pesados",
+      "generic": false,
+      "patterns": ["\\bmercurio\\b", "\\bmercury\\b", "\\bmethylmercury\\b", "\\bmetilmercurio\\b", "\\bhg\\b"]
+    },
+    {
+      "id": "manganese",
+      "label_es": "manganeso",
+      "label_en": "manganese",
+      "category": "Metales pesados",
+      "generic": false,
+      "patterns": ["\\bmanganeso\\b", "\\bmanganese\\b", "\\bmn\\b"]
+    },
+    {
+      "id": "copper",
+      "label_es": "cobre",
+      "label_en": "copper",
+      "category": "Metales pesados",
+      "generic": false,
+      "patterns": ["\\bcobre\\b", "\\bcopper\\b", "\\bcu\\b", "\\bcuso\\s*4\\b", "\\bcuso4\\b"]
+    },
+    {
+      "id": "chromium",
+      "label_es": "cromo",
+      "label_en": "chromium",
+      "category": "Metales pesados",
+      "generic": false,
+      "patterns": ["\\bcromo\\b", "\\bchromium\\b", "\\bcr\\b"]
+    },
+    {
+      "id": "nickel",
+      "label_es": "niquel",
+      "label_en": "nickel",
+      "category": "Metales pesados",
+      "generic": false,
+      "patterns": ["\\bn[ií]quel\\b", "\\bnickel\\b"]
+    },
+    {
+      "id": "zinc",
+      "label_es": "zinc",
+      "label_en": "zinc",
+      "category": "Metales pesados",
+      "generic": false,
+      "patterns": ["\\bzinc\\b", "\\bzn\\b"]
+    },
+    {
+      "id": "selenium",
+      "label_es": "selenio",
+      "label_en": "selenium",
+      "category": "Metales pesados",
+      "generic": false,
+      "patterns": ["\\bselenio\\b", "\\bselenium\\b"]
+    },
+    {
+      "id": "uranium",
+      "label_es": "uranio",
+      "label_en": "uranium",
+      "category": "Metales pesados",
+      "generic": false,
+      "patterns": ["\\buranio\\b", "\\buranium\\b", "\\bdepleted uranium\\b"]
+    },
+    {
+      "id": "heavy_metals_generic",
+      "label_es": "metales pesados",
+      "label_en": "heavy metals",
+      "category": "Metales pesados",
+      "generic": true,
+      "patterns": ["\\bheavy metals?\\b", "\\bmetales pesados?\\b", "\\bpotentially toxic elements?\\b", "\\bpte?s\\b"]
+    },
+    {
+      "id": "paraquat",
+      "label_es": "paraquat",
+      "label_en": "paraquat",
+      "category": "Pesticidas",
+      "generic": false,
+      "patterns": ["\\bparaquat\\b"]
+    },
+    {
+      "id": "atrazine",
+      "label_es": "atrazina",
+      "label_en": "atrazine",
+      "category": "Pesticidas",
+      "generic": false,
+      "patterns": ["\\batrazina\\b", "\\batrazine\\b"]
+    },
+    {
+      "id": "glyphosate",
+      "label_es": "glifosato",
+      "label_en": "glyphosate",
+      "category": "Pesticidas",
+      "generic": false,
+      "patterns": ["\\bglifosato\\b", "\\bglyphosate\\b", "\\baminomethylphosphonic acid\\b", "\\bampa\\b"]
+    },
+    {
+      "id": "mancozeb",
+      "label_es": "mancozeb",
+      "label_en": "mancozeb",
+      "category": "Pesticidas",
+      "generic": false,
+      "patterns": ["\\bmancozeb\\b"]
+    },
+    {
+      "id": "dichlorvos",
+      "label_es": "diclorvos",
+      "label_en": "dichlorvos",
+      "category": "Pesticidas",
+      "generic": false,
+      "patterns": ["\\bdiclorvos\\b", "\\bdichlorvos\\b"]
+    },
+    {
+      "id": "diazinon",
+      "label_es": "diazinon",
+      "label_en": "diazinon",
+      "category": "Pesticidas",
+      "generic": false,
+      "patterns": ["\\bdiazin[oó]n\\b", "\\bdiazinon\\b"]
+    },
+    {
+      "id": "chlorpyrifos",
+      "label_es": "clorpirifos",
+      "label_en": "chlorpyrifos",
+      "category": "Pesticidas",
+      "generic": false,
+      "patterns": ["\\bclorpirif[oó]s\\b", "\\bchlorpyrifos\\b"]
+    },
+    {
+      "id": "triadimefon",
+      "label_es": "triadimefon",
+      "label_en": "triadimefon",
+      "category": "Pesticidas",
+      "generic": false,
+      "patterns": ["\\btriadimefon\\b"]
+    },
+    {
+      "id": "pesticides_generic",
+      "label_es": "pesticidas/plaguicidas",
+      "label_en": "pesticides",
+      "category": "Pesticidas",
+      "generic": true,
+      "patterns": ["\\bpesticides?\\b", "\\bplaguicidas?\\b", "\\bherbicides?\\b", "\\bherbicidas?\\b", "\\bfungicides?\\b", "\\borganophosphates?\\b", "\\borganofosforados?\\b"]
+    },
+    {
+      "id": "pah",
+      "label_es": "hidrocarburos aromaticos policiclicos",
+      "label_en": "PAH",
+      "category": "Contaminantes organicos persistentes",
+      "generic": true,
+      "patterns": ["\\bpahs?\\b", "\\bpolycyclic aromatic hydrocarbons?\\b", "\\bhidrocarburos arom[aá]ticos polic[ií]clicos\\b"]
+    },
+    {
+      "id": "benzo_a_pyrene",
+      "label_es": "benzo[a]pireno",
+      "label_en": "benzo[a]pyrene",
+      "category": "Contaminantes organicos persistentes",
+      "generic": false,
+      "patterns": ["\\bbenzo\\s*\\[?a\\]?\\s*pyrene\\b", "\\bbenzo\\s*\\[?a\\]?\\s*pireno\\b", "\\bbenzopyrene\\b", "\\bbap\\b"]
+    },
+    {
+      "id": "pcb",
+      "label_es": "bifenilos policlorados",
+      "label_en": "PCB",
+      "category": "Contaminantes organicos persistentes",
+      "generic": false,
+      "patterns": ["\\bpcbs?\\b", "\\bpolychlorinated biphenyls?\\b", "\\bbifenilos policlorados\\b"]
+    },
+    {
+      "id": "dioxins",
+      "label_es": "dioxinas",
+      "label_en": "dioxins",
+      "category": "Contaminantes organicos persistentes",
+      "generic": false,
+      "patterns": ["\\bdioxinas?\\b", "\\bdioxins?\\b", "\\btcdd\\b"]
+    },
+    {
+      "id": "pops_generic",
+      "label_es": "contaminantes organicos persistentes",
+      "label_en": "persistent organic pollutants",
+      "category": "Contaminantes organicos persistentes",
+      "generic": true,
+      "patterns": ["\\bpersistent organic pollutants?\\b", "\\bcontaminantes org[aá]nicos persistentes\\b", "\\bpops?\\b"]
+    },
+    {
+      "id": "microplastics",
+      "label_es": "microplasticos",
+      "label_en": "microplastics",
+      "category": "Microplasticos",
+      "generic": false,
+      "patterns": ["\\bmicropl[aá]sticos?\\b", "\\bmicroplastics?\\b"]
+    },
+    {
+      "id": "nanoplastics",
+      "label_es": "nanoplasticos",
+      "label_en": "nanoplastics",
+      "category": "Microplasticos",
+      "generic": false,
+      "patterns": ["\\bnanopl[aá]sticos?\\b", "\\bnanoplastics?\\b", "\\bpolystyrene nanoplastics?\\b", "\\bpolystyrene nanoparticles?\\b"]
+    },
+    {
+      "id": "particulate_matter",
+      "label_es": "material particulado",
+      "label_en": "particulate matter",
+      "category": "Material particulado",
+      "generic": true,
+      "patterns": ["\\bmaterial particulado\\b", "\\bparticulate matter\\b", "\\bpm\\s*2\\.?5\\b", "\\bpm\\s*10\\b", "\\bultrafine particles?\\b"]
+    },
+    {
+      "id": "air_pollution_generic",
+      "label_es": "contaminacion atmosferica",
+      "label_en": "air pollution",
+      "category": "Contaminantes atmosfericos",
+      "generic": true,
+      "patterns": ["\\bair pollution\\b", "\\bambient air pollution\\b", "\\bcontaminaci[oó]n atmosf[eé]rica\\b", "\\bnitrogen dioxide\\b", "\\bno2\\b", "\\bozone\\b", "\\bo3\\b", "\\bsulfur dioxide\\b", "\\bso2\\b"]
+    },
+    {
+      "id": "solvents_generic",
+      "label_es": "solventes",
+      "label_en": "solvents",
+      "category": "Solventes",
+      "generic": true,
+      "patterns": ["\\bsolvents?\\b", "\\bsolventes?\\b", "\\btoluene\\b", "\\btolueno\\b", "\\btrichloroethylene\\b", "\\btricloroetileno\\b", "\\bbenzene\\b", "\\bbenceno\\b"]
+    },
+    {
+      "id": "pfas",
+      "label_es": "PFAS",
+      "label_en": "PFAS",
+      "category": "Otros contaminantes relevantes",
+      "generic": false,
+      "patterns": ["\\bpfas\\b", "\\bpfos\\b", "\\bpfoa\\b", "\\bpfhxs\\b", "\\bperfluoroalkyl\\b", "\\bperfluoroalkylated\\b"]
+    },
+    {
+      "id": "bmaa",
+      "label_es": "BMAA",
+      "label_en": "BMAA",
+      "category": "Otros contaminantes relevantes",
+      "generic": false,
+      "patterns": ["\\bbmaa\\b", "\\bβ\\s*-?n\\s*-?methylamino\\s*-?l\\s*-?alanine\\b", "\\bbeta\\s*-?n\\s*-?methylamino\\s*-?l\\s*-?alanine\\b", "\\bβ\\s*-?methylamino\\s*-?l\\s*-?alanine\\b"]
+    },
+    {
+      "id": "microcystin",
+      "label_es": "microcistina",
+      "label_en": "microcystin",
+      "category": "Otros contaminantes relevantes",
+      "generic": false,
+      "patterns": ["\\bmicrocistina\\b", "\\bmicrocystin\\b", "\\bmc\\s*-?lr\\b"]
+    },
+    {
+      "id": "cyanotoxins_generic",
+      "label_es": "cianotoxinas",
+      "label_en": "cyanotoxins",
+      "category": "Otros contaminantes relevantes",
+      "generic": true,
+      "patterns": ["\\bcianotoxinas?\\b", "\\bcyanotoxins?\\b", "\\bcyanobacteria\\b", "\\bcianobacterias\\b", "\\bdinoflagellates?\\b"]
+    },
+    {
+      "id": "furosemide_pyridinium",
+      "label_es": "piridinio de furosemida",
+      "label_en": "furosemide pyridinium",
+      "category": "Otros contaminantes relevantes",
+      "generic": false,
+      "patterns": ["\\bfurosemida\\b", "\\bfurosemide\\b", "\\bpyridinium\\b", "\\bpiridinio\\b"]
+    },
+    {
+      "id": "bisphenol_a",
+      "label_es": "bisfenol A",
+      "label_en": "bisphenol A",
+      "category": "Otros contaminantes relevantes",
+      "generic": false,
+      "patterns": ["\\bbisphenol a\\b", "\\bbisfenol a\\b", "\\bbpa\\b"]
+    },
+    {
+      "id": "environmental_mixture",
+      "label_es": "mezcla ambiental",
+      "label_en": "environmental mixture",
+      "category": "Otros contaminantes relevantes",
+      "generic": true,
+      "patterns": ["\\bleachate\\b", "\\blixiviado\\b", "\\bwastewater\\b", "\\bcontaminated drinking water\\b", "\\bcontaminated water\\b", "\\bmezcla de contaminantes\\b"]
+    }
+  ]
+}

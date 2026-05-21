@@ -1,0 +1,216 @@
+{
+  "version": "1.0",
+  "descripcion": "Diccionario auditable de contaminantes y familias para la revision de contaminantes en agua y neurodegeneracion. Cada patron es una expresion regular buscada sin distinguir mayusculas/minusculas.",
+  "contaminantes": [
+    {
+      "canonico": "aluminio",
+      "familia": "Metales y metaloides",
+      "patrones": ["\\baluminio\\b", "\\baluminium\\b", "\\baluminum\\b"]
+    },
+    {
+      "canonico": "cadmio",
+      "familia": "Metales y metaloides",
+      "patrones": ["\\bcadmio\\b", "\\bcadmium\\b", "\\bcdcl2\\b", "\\bcdcl_?2\\b"]
+    },
+    {
+      "canonico": "plomo",
+      "familia": "Metales y metaloides",
+      "patrones": ["\\bplomo\\b", "\\blead\\s+(acetate|exposure|poisoning|levels?|concentrations?|contamination|compounds?|neurotoxicity)\\b", "\\bpb\\b"]
+    },
+    {
+      "canonico": "arsenico",
+      "familia": "Metales y metaloides",
+      "patrones": ["\\bars[eé]nico\\b", "\\barsenic\\b", "\\binorganic arsenic\\b"]
+    },
+    {
+      "canonico": "manganeso",
+      "familia": "Metales y metaloides",
+      "patrones": ["\\bmanganeso\\b", "\\bmanganese\\b"]
+    },
+    {
+      "canonico": "cobre",
+      "familia": "Metales y metaloides",
+      "patrones": ["\\bcobre\\b", "\\bcopper\\b", "\\bcuso4\\b", "\\bcuso_?4\\b"]
+    },
+    {
+      "canonico": "mercurio",
+      "familia": "Metales y metaloides",
+      "patrones": ["\\bmercurio\\b", "\\bmercury\\b", "\\bmethylmercury\\b", "\\bmetilmercurio\\b", "\\binorganic mercury\\b"]
+    },
+    {
+      "canonico": "cromo",
+      "familia": "Metales y metaloides",
+      "patrones": ["\\bcromo\\b", "\\bchromium\\b"]
+    },
+    {
+      "canonico": "niquel",
+      "familia": "Metales y metaloides",
+      "patrones": ["\\bn[ií]quel\\b", "\\bnickel\\b"]
+    },
+    {
+      "canonico": "zinc",
+      "familia": "Metales y metaloides",
+      "patrones": ["\\bzinc\\b", "\\bzinc\\b"]
+    },
+    {
+      "canonico": "selenio",
+      "familia": "Metales y metaloides",
+      "patrones": ["\\bselenio\\b", "\\bselenium\\b"]
+    },
+    {
+      "canonico": "uranio",
+      "familia": "Metales y metaloides",
+      "patrones": ["\\buranio\\b", "\\buranium\\b", "\\bdepleted uranium\\b"]
+    },
+    {
+      "canonico": "paraquat",
+      "familia": "Plaguicidas y herbicidas",
+      "patrones": ["\\bparaquat\\b"]
+    },
+    {
+      "canonico": "atrazina",
+      "familia": "Plaguicidas y herbicidas",
+      "patrones": ["\\batrazina\\b", "\\batrazine\\b"]
+    },
+    {
+      "canonico": "glifosato",
+      "familia": "Plaguicidas y herbicidas",
+      "patrones": ["\\bglifosato\\b", "\\bglyphosate\\b", "\\baminomethylphosphonic acid\\b", "\\bampa\\b"]
+    },
+    {
+      "canonico": "mancozeb",
+      "familia": "Plaguicidas y herbicidas",
+      "patrones": ["\\bmancozeb\\b"]
+    },
+    {
+      "canonico": "diclorvos",
+      "familia": "Plaguicidas y herbicidas",
+      "patrones": ["\\bdiclorvos\\b", "\\bdichlorvos\\b"]
+    },
+    {
+      "canonico": "diazinon",
+      "familia": "Plaguicidas y herbicidas",
+      "patrones": ["\\bdiazin[oó]n\\b", "\\bdiazinon\\b"]
+    },
+    {
+      "canonico": "clorpirifos",
+      "familia": "Plaguicidas y herbicidas",
+      "patrones": ["\\bclorpirif[oó]s\\b", "\\bchlorpyrifos\\b"]
+    },
+    {
+      "canonico": "triadimefon",
+      "familia": "Plaguicidas y herbicidas",
+      "patrones": ["\\btriadimefon\\b"]
+    },
+    {
+      "canonico": "plaguicidas_generico",
+      "familia": "Plaguicidas y herbicidas",
+      "generico": true,
+      "patrones": ["\\bplaguicidas?\\b", "\\bpesticides?\\b", "\\bherbicides?\\b", "\\bfungicides?\\b", "\\borganophosphates?\\b", "\\borganofosforados?\\b"]
+    },
+    {
+      "canonico": "benzo[a]pireno",
+      "familia": "PAH e hidrocarburos",
+      "patrones": ["\\bbenzo\\s*\\[?a\\]?\\s*pyrene\\b", "\\bbenzo\\s*\\[?a\\]?\\s*pireno\\b", "\\bbenzopyrene\\b", "\\bbap\\b"]
+    },
+    {
+      "canonico": "pah_generico",
+      "familia": "PAH e hidrocarburos",
+      "generico": true,
+      "patrones": ["\\bpahs?\\b", "\\bpolycyclic aromatic hydrocarbons?\\b", "\\bhidrocarburos aromaticos policiclicos\\b"]
+    },
+    {
+      "canonico": "microplasticos",
+      "familia": "Microplasticos y nanoplasticos",
+      "patrones": ["\\bmicropl[aá]sticos?\\b", "\\bmicroplastics?\\b"]
+    },
+    {
+      "canonico": "nanoplasticos",
+      "familia": "Microplasticos y nanoplasticos",
+      "patrones": ["\\bnanopl[aá]sticos?\\b", "\\bnanoplastics?\\b", "\\bpolystyrene nanoplastics?\\b", "\\bpolystyrene nanoparticles?\\b"]
+    },
+    {
+      "canonico": "pfas",
+      "familia": "PFAS",
+      "patrones": ["\\bpfas\\b", "\\bpfos\\b", "\\bpfoa\\b", "\\bpfhxs\\b", "\\bperfluoroalkyl\\b", "\\bperfluoroalkylated\\b"]
+    },
+    {
+      "canonico": "pcb",
+      "familia": "PCB, dioxinas y POP",
+      "patrones": ["\\bpcbs?\\b", "\\bpolychlorinated biphenyls?\\b", "\\bbifenilos policlorados\\b"]
+    },
+    {
+      "canonico": "dioxinas",
+      "familia": "PCB, dioxinas y POP",
+      "patrones": ["\\bdioxinas?\\b", "\\bdioxins?\\b", "\\btcdd\\b"]
+    },
+    {
+      "canonico": "pop_generico",
+      "familia": "PCB, dioxinas y POP",
+      "generico": true,
+      "patrones": ["\\bpersistent organic pollutants?\\b", "\\bcontaminantes organicos persistentes\\b", "\\bpops?\\b"]
+    },
+    {
+      "canonico": "bmaa",
+      "familia": "Cianotoxinas y BMAA",
+      "patrones": ["\\bbmaa\\b", "\\bβ\\s*-?n\\s*-?methylamino\\s*-?l\\s*-?alanine\\b", "\\bbeta\\s*-?n\\s*-?methylamino\\s*-?l\\s*-?alanine\\b", "\\bβ\\s*-?methylamino\\s*-?l\\s*-?alanine\\b"]
+    },
+    {
+      "canonico": "microcistina",
+      "familia": "Cianotoxinas y BMAA",
+      "patrones": ["\\bmicrocistina\\b", "\\bmicrocystin\\b", "\\bmc-lr\\b"]
+    },
+    {
+      "canonico": "cianotoxinas_generico",
+      "familia": "Cianotoxinas y BMAA",
+      "generico": true,
+      "patrones": ["\\bcianotoxinas?\\b", "\\bcyanotoxins?\\b", "\\bcyanobacteria\\b", "\\bcianobacterias\\b", "\\bdinoflagellates?\\b"]
+    },
+    {
+      "canonico": "furosemida_piridinio",
+      "familia": "Farmacos y contaminantes emergentes",
+      "patrones": ["\\bfurosemida\\b", "\\bfurosemide\\b", "\\bpyridinium\\b", "\\bpiridinio\\b"]
+    },
+    {
+      "canonico": "salicilato_de_fenilo",
+      "familia": "Farmacos y contaminantes emergentes",
+      "patrones": ["\\bphenyl salicylate\\b", "\\bsalicilato de fenilo\\b"]
+    },
+    {
+      "canonico": "etinilestradiol",
+      "familia": "Farmacos y contaminantes emergentes",
+      "patrones": ["\\bethinylestradiol\\b", "\\betinilestradiol\\b", "\\bee2\\b"]
+    },
+    {
+      "canonico": "bisfenol_a",
+      "familia": "Farmacos y contaminantes emergentes",
+      "patrones": ["\\bbisphenol a\\b", "\\bbisfenol a\\b", "\\bbpa\\b"]
+    },
+    {
+      "canonico": "farmacos_generico",
+      "familia": "Farmacos y contaminantes emergentes",
+      "generico": true,
+      "patrones": ["\\bpharmaceuticals?\\b", "\\bf[aá]rmacos?\\b", "\\bantipsychotics?\\b", "\\bmetformin\\b", "\\bmetformina\\b", "\\bnaproxen\\b", "\\bnaproxeno\\b", "\\bpenicillin g\\b"]
+    },
+    {
+      "canonico": "dureza_del_agua",
+      "familia": "Calidad del agua y minerales",
+      "patrones": ["\\bwater hardness\\b", "\\bdureza del agua\\b", "\\bhard water\\b", "\\bsoft water\\b"]
+    },
+    {
+      "canonico": "calcio_magnesio_silice",
+      "familia": "Calidad del agua y minerales",
+      "patrones": ["\\b(calcium|calcio|magnesium|magnesio|silica|s[ií]lice)\\s+(concentration|concentrations|levels?|content)\\s+(in|of)\\s+(drinking\\s+)?water\\b", "\\b(drinking\\s+)?water\\s+(calcium|calcio|magnesium|magnesio|silica|s[ií]lice)\\b", "\\bsilica\\s+in\\s+drinking\\s+water\\b", "\\bs[ií]lice\\s+en\\s+agua\\b"]
+    },
+    {
+      "canonico": "lixiviado_mezcla",
+      "familia": "Mezclas ambientales",
+      "patrones": ["\\bleachate\\b", "\\blixiviado\\b", "\\bwastewater\\b", "\\bcontaminated drinking water\\b", "\\bcontaminated water\\b", "\\bmezcla de contaminantes\\b"]
+    },
+    {
+      "canonico": "monomeros_cristal_liquido",
+      "familia": "Contaminantes industriales emergentes",
+      "patrones": ["\\bliquid crystal monomers?\\b", "\\bmon[oó]meros de cristal l[ií]quido\\b"]
+    }
+  ]
+}

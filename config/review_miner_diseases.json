@@ -1,0 +1,62 @@
+{
+  "version": "1.0",
+  "description": "Controlled bilingual lexicon for neurodegenerative diseases and related outcomes.",
+  "entities": [
+    {
+      "id": "alzheimers_disease",
+      "label_es": "Alzheimer",
+      "label_en": "Alzheimer's disease",
+      "category": "Alzheimer",
+      "patterns": ["\\balzheimer'?s?\\b", "\\benfermedad de alzheimer\\b", "\\bad\\b", "\\bamyloid\\b", "\\bamiloide\\b", "\\btau\\b"]
+    },
+    {
+      "id": "parkinsons_disease",
+      "label_es": "Parkinson",
+      "label_en": "Parkinson's disease",
+      "category": "Parkinson",
+      "patterns": ["\\bparkinson'?s?\\b", "\\benfermedad de parkinson\\b", "\\bparkinsonism\\b", "\\bparkinsonismo\\b", "\\bdopaminergic\\b", "\\bdopamin[eé]rgic[ao]s?\\b"]
+    },
+    {
+      "id": "amyotrophic_lateral_sclerosis",
+      "label_es": "Esclerosis lateral amiotrofica",
+      "label_en": "amyotrophic lateral sclerosis",
+      "category": "Esclerosis lateral amiotrofica",
+      "patterns": ["\\bamyotrophic lateral sclerosis\\b", "\\besclerosis lateral amiotr[oó]fica\\b", "\\bals\\b", "\\bela\\b", "\\bmotor neuron disease\\b", "\\bmotoneuron disease\\b"]
+    },
+    {
+      "id": "huntingtons_disease",
+      "label_es": "Huntington",
+      "label_en": "Huntington's disease",
+      "category": "Huntington",
+      "patterns": ["\\bhuntington'?s?\\b", "\\benfermedad de huntington\\b"]
+    },
+    {
+      "id": "dementia",
+      "label_es": "demencia",
+      "label_en": "dementia",
+      "category": "Demencia",
+      "patterns": ["\\bdementia\\b", "\\bdemencia\\b", "\\bvascular dementia\\b", "\\bdemencia vascular\\b", "\\bmixed dementia\\b", "\\bdemencia mixta\\b"]
+    },
+    {
+      "id": "cognitive_impairment",
+      "label_es": "deterioro cognitivo",
+      "label_en": "cognitive impairment",
+      "category": "Deterioro cognitivo",
+      "patterns": ["\\bcognitive impairment\\b", "\\bdeterioro cognitivo\\b", "\\bmild cognitive impairment\\b", "\\bmci\\b", "\\bneuropsychological functioning\\b", "\\bmemory impairment\\b"]
+    },
+    {
+      "id": "multiple_sclerosis",
+      "label_es": "esclerosis multiple",
+      "label_en": "multiple sclerosis",
+      "category": "Otras enfermedades detectadas",
+      "patterns": ["\\bmultiple sclerosis\\b", "\\besclerosis m[uú]ltiple\\b", "\\bdemyelinating\\b", "\\bdesmielinizaci[oó]n\\b"]
+    },
+    {
+      "id": "neurodegeneration_general",
+      "label_es": "neurodegeneracion general",
+      "label_en": "general neurodegeneration",
+      "category": "Enfermedades neurodegenerativas generales",
+      "patterns": ["\\bneurodegenerative diseases?\\b", "\\bneurodegeneraci[oó]n\\b", "\\bneurodegenerative disorders?\\b", "\\bneurotoxicity\\b", "\\bneurotoxicidad\\b"]
+    }
+  ]
+}

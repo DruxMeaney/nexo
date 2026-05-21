@@ -1,0 +1,25 @@
+.DS_Store
+node_modules/
+.next/
+out/
+coverage/
+tsconfig.tsbuildinfo
+.env
+.env.local
+.env.*.local
+
+# Scientific corpora and generated outputs can contain private or copyrighted data.
+Articulos/
+outputs/
+salidas_contexto_contaminantes/
+*.pdf
+*.docx
+*.xlsx
+*.pptx
+
+# Python runtime artifacts.
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.vercel
