@@ -2,7 +2,11 @@
 
 **Mineria de datos para revisiones.**
 
+[![Vercel](https://img.shields.io/badge/Live-nexo--flame.vercel.app-black?logo=vercel)](https://nexo-flame.vercel.app)
+
 Interfaz web local-first para revision sistematica de literatura cientifica. NEXO envuelve un pipeline Python generico (`review_miner`) que toma cualquier par de variables (contaminantes/enfermedades, farmacos/efectos adversos, especies/ecosistemas, etc.) definido como un protocolo y produce menciones auditables, relaciones con evidencia textual, figuras, tablas y un reporte Word.
+
+> La interfaz se aloja en Vercel ([nexo-flame.vercel.app](https://nexo-flame.vercel.app)) para hojear el diseñador, los ejemplos y la documentacion. El procesamiento real de PDFs corre localmente con `npm run dev` — Vercel no puede leer tus carpetas privadas.
 
 ## Que hace
 
