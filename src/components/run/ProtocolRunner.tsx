@@ -12,6 +12,7 @@ import {
   Play
 } from "lucide-react";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { pluralize } from "@/lib/i18n/format";
 import type { PipelineJob, PipelineStep } from "@/lib/types";
 
 interface ProtocolSummary {
@@ -290,7 +291,7 @@ function ProtocolHeader({ protocol, t }: { protocol: ProtocolSummary; t: Diction
           <strong>{nameA}</strong>
           <span className="muted">
             {" "}
-            · {t.execute.termsCount.replace("{count}", String(protocol.termCountA))}
+            · {pluralize(protocol.termCountA, t.execute.termsCount, t.execute.termsCountSingular)}
           </span>
         </div>
         <div>
@@ -300,7 +301,7 @@ function ProtocolHeader({ protocol, t }: { protocol: ProtocolSummary; t: Diction
           <strong>{nameB}</strong>
           <span className="muted">
             {" "}
-            · {t.execute.termsCount.replace("{count}", String(protocol.termCountB))}
+            · {pluralize(protocol.termCountB, t.execute.termsCount, t.execute.termsCountSingular)}
           </span>
         </div>
       </div>

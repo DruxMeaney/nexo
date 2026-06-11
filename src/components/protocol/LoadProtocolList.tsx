@@ -31,6 +31,24 @@ interface LoadResponse {
 
 const STORAGE_KEY = "nexo.protocol-draft.v1";
 
+/**
+ * Format a saved timestamp using the navigator's locale, with a long-form
+ * style that avoids ambiguous "11/6/2026". E.g. "6 nov 2026, 11:08".
+ */
+function formatSavedAt(iso: string): string {
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    }).format(new Date(iso));
+  } catch {
+    return iso;
+  }
+}
+
 interface Props {
   t: Dictionary;
 }
@@ -181,7 +199,7 @@ export function LoadProtocolList({ t }: Props) {
                 <>
                   {t.loadProtocol.savedAtPrefix}{" "}
                   <time dateTime={item.savedAt}>
-                    {new Date(item.savedAt).toLocaleString()}
+                    {formatSavedAt(item.savedAt)}
                   </time>
                 </>
               ) : null}

@@ -7,7 +7,7 @@ import { getDictionary } from "@/lib/i18n/server";
 export default async function LoadProtocolPage() {
   const t = await getDictionary();
   return (
-    <AppShell>
+    <AppShell showFooterCta={false}>
       <main>
         <section className="page-title">
           <p className="eyebrow" style={{ color: "var(--rust)" }}>

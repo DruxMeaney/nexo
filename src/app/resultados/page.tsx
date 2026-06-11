@@ -1,5 +1,6 @@
 import { AppShell } from "@/components/AppShell";
 import { ResultsClient } from "@/components/ResultsClient";
+import { getDictionary } from "@/lib/i18n/server";
 
 type ResultsPageProps = {
   searchParams?: Promise<{
@@ -8,22 +9,20 @@ type ResultsPageProps = {
 };
 
 export default async function ResultsPage({ searchParams }: ResultsPageProps) {
-  const params = searchParams ? await searchParams : {};
+  const params: { outputDir?: string } = searchParams ? await searchParams : {};
+  const t = await getDictionary();
   return (
-    <AppShell>
+    <AppShell showFooterCta={false}>
       <main>
         <div className="page-title">
           <p className="eyebrow" style={{ color: "var(--teal-dark)" }}>
-            Resultados
+            {t.results.eyebrow}
           </p>
-          <h1>Visualizador de evidencia</h1>
-          <p>
-            Navega figuras, tablas, documentos Word y paquetes descargables generados por el pipeline. La vista prioriza
-            trazabilidad y revision manual sobre conclusiones automaticas.
-          </p>
+          <h1>{t.results.title}</h1>
+          <p>{t.results.copy}</p>
         </div>
         <section className="section compact">
-          <ResultsClient initialOutputDir={params.outputDir} />
+          <ResultsClient initialOutputDir={params.outputDir} t={t} />
         </section>
       </main>
     </AppShell>

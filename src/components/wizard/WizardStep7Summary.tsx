@@ -9,6 +9,7 @@ import { countCategories, countTerms } from "@/lib/protocol/draft";
 import { slugifyName } from "@/lib/protocol/folder";
 import type { CueFamilyId } from "@/lib/protocol/types";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { pluralize } from "@/lib/i18n/format";
 
 interface Props {
   t: Dictionary;
@@ -343,9 +344,9 @@ function VariableSummaryRow({
       <div>
         <strong>{label}</strong>
         <p className="muted" style={{ margin: 0 }}>
-          {t.wizard.summary.countCategories.replace("{count}", String(categories))}
+          {pluralize(categories, t.wizard.summary.countCategories, t.wizard.summary.countCategoriesSingular)}
           {" · "}
-          {t.wizard.summary.countTerms.replace("{count}", String(terms))}
+          {pluralize(terms, t.wizard.summary.countTerms, t.wizard.summary.countTermsSingular)}
         </p>
       </div>
     </div>

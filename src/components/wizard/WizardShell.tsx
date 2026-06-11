@@ -13,6 +13,7 @@ import { WizardStep4Cues } from "@/components/wizard/WizardStep4Cues";
 import { WizardStep5Sections } from "@/components/wizard/WizardStep5Sections";
 import { WizardStep6Parameters } from "@/components/wizard/WizardStep6Parameters";
 import { WizardStep7Summary } from "@/components/wizard/WizardStep7Summary";
+import { FirstVisitHint } from "@/components/wizard/FirstVisitHint";
 import {
   maxReachableStep,
   validateAll
@@ -81,7 +82,16 @@ function WizardShellInner({ t }: WizardShellProps) {
 
   return (
     <div className="wizard">
-      <ol className="wizard-steps" aria-label={t.newProtocol.stepsLabel}>
+      <FirstVisitHint
+        t={{
+          title: t.wizard.firstVisitTitle,
+          bulletAutosave: t.wizard.firstVisitAutosave,
+          bulletImport: t.wizard.firstVisitImport,
+          bulletTemplate: t.wizard.firstVisitTemplate,
+          dismissAria: t.wizard.firstVisitDismiss
+        }}
+      />
+      <ol className="wizard-progress" aria-label={t.newProtocol.stepsLabel}>
         {WIZARD_STEPS.map((step, idx) => {
           const validation = validations[step];
           const status =
@@ -95,33 +105,40 @@ function WizardShellInner({ t }: WizardShellProps) {
           const maxAllowed = Math.min(reachable + 1, WIZARD_STEPS.length - 1);
           const locked = idx > stepIndex && idx > maxAllowed;
           return (
-            <li key={step} className={`wizard-step wizard-step-${status}`}>
+            <li key={step} className={`wizard-progress-step wizard-progress-${status}`}>
               <button
                 type="button"
-                className="wizard-step-button"
+                className="wizard-progress-button"
                 onClick={() => goTo(step, idx)}
                 aria-current={status === "current" ? "step" : undefined}
                 aria-disabled={locked || undefined}
                 disabled={locked}
+                title={t.wizard.stepDescriptions[step]}
               >
-                <span className="wizard-step-index" aria-hidden="true">
+                <span className="wizard-progress-index" aria-hidden="true">
                   {status === "done" ? (
-                    <Check size={14} />
+                    <Check size={12} />
                   ) : locked ? (
-                    <Lock size={13} />
+                    <Lock size={11} />
                   ) : (
                     idx + 1
                   )}
                 </span>
-                <span className="wizard-step-label">{t.wizard.steps[step]}</span>
+                <span className="wizard-progress-label">{t.wizard.steps[step]}</span>
               </button>
-              <p className="wizard-step-description">
-                {t.wizard.stepDescriptions[step]}
-              </p>
             </li>
           );
         })}
       </ol>
+      <p className="wizard-progress-caption">
+        <span className="muted">
+          {t.newProtocol.stepIndicator
+            .replace("{current}", String(stepIndex + 1))
+            .replace("{total}", String(WIZARD_STEPS.length))}
+          {" · "}
+        </span>
+        {t.wizard.stepDescriptions[currentStep]}
+      </p>
 
       <section className="wizard-body">
         {!hydrated ? (

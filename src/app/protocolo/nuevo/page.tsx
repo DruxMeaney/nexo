@@ -7,25 +7,21 @@ import { getDictionary } from "@/lib/i18n/server";
 export default async function NewProtocolPage() {
   const t = await getDictionary();
   return (
-    <AppShell>
+    <AppShell showFooterCta={false}>
       <main>
-        <section className="page-title">
-          <p className="eyebrow" style={{ color: "var(--teal-dark)" }}>
-            {t.newProtocol.eyebrow}
-          </p>
-          <h1>{t.newProtocol.title}</h1>
-          <p>{t.newProtocol.copy}</p>
-          <Link
-            href="/comenzar"
-            className="button-ghost"
-            style={{ marginTop: 8, paddingLeft: 0 }}
-          >
+        <div className="page-header-compact">
+          <div>
+            <p className="eyebrow" style={{ color: "var(--teal-dark)", margin: 0 }}>
+              {t.newProtocol.eyebrow}
+            </p>
+            <h1 className="page-header-compact-title">{t.newProtocol.title}</h1>
+          </div>
+          <Link href="/comenzar" className="button-ghost">
             <ArrowLeft size={15} />
             {t.newProtocol.backToStart}
           </Link>
-        </section>
-
-        <section className="section">
+        </div>
+        <section className="section section-tight">
           <WizardShell t={t} />
         </section>
       </main>

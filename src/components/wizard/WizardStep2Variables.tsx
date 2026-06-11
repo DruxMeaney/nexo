@@ -62,7 +62,8 @@ export function WizardStep2Variables({ t, errors }: Props) {
           t={t}
           title={t.wizard.variables.variableA}
           variable={draft.variableA}
-          placeholderEs={t.wizard.variables.fieldDisplayNamePlaceholderA}
+          placeholderEs="Ej. Contaminantes"
+          placeholderEn="e.g. Contaminants"
           onChange={(patch) => setVariableMetadata("variableA", patch)}
           slot="A"
           nameInvalid={aInvalid}
@@ -71,7 +72,8 @@ export function WizardStep2Variables({ t, errors }: Props) {
           t={t}
           title={t.wizard.variables.variableB}
           variable={draft.variableB}
-          placeholderEs={t.wizard.variables.fieldDisplayNamePlaceholderB}
+          placeholderEs="Ej. Enfermedades"
+          placeholderEn="e.g. Diseases"
           onChange={(patch) => setVariableMetadata("variableB", patch)}
           slot="B"
           nameInvalid={bInvalid}
@@ -86,6 +88,7 @@ interface VariableCardProps {
   title: string;
   variable: ProtocolVariable;
   placeholderEs: string;
+  placeholderEn: string;
   onChange: (patch: Partial<ProtocolVariable["metadata"]>) => void;
   slot: "A" | "B";
   nameInvalid: boolean;
@@ -96,6 +99,7 @@ function VariableCard({
   title,
   variable,
   placeholderEs,
+  placeholderEn,
   onChange,
   slot,
   nameInvalid
@@ -126,7 +130,7 @@ function VariableCard({
             id={`${idPrefix}-en`}
             type="text"
             value={metadata.displayNameEn}
-            placeholder={placeholderEs}
+            placeholder={placeholderEn}
             onChange={(e) => onChange({ displayNameEn: e.target.value })}
           />
         </div>

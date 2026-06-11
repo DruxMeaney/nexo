@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { ArrowRight, FolderOpen, Sparkles, Lightbulb } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
-import { getDictionary } from "@/lib/i18n/server";
+import { TemplateLoader } from "@/components/protocol/TemplateLoader";
+import { getDictionary, getLocale } from "@/lib/i18n/server";
 
 export default async function StartPage() {
-  const t = await getDictionary();
+  const [t, locale] = await Promise.all([getDictionary(), getLocale()]);
   return (
-    <AppShell>
+    <AppShell showFooterCta={false}>
       <main>
         <section className="page-title">
           <p className="eyebrow" style={{ color: "var(--teal-dark)" }}>
@@ -48,6 +49,15 @@ export default async function StartPage() {
               </Link>
             </article>
           </div>
+
+          <TemplateLoader
+            locale={locale}
+            t={{
+              title: t.start.templatesTitle,
+              copy: t.start.templatesCopy,
+              loadCta: t.start.templateLoadCta
+            }}
+          />
 
           <aside className="welcome-tip" role="note">
             <Lightbulb size={20} aria-hidden="true" />

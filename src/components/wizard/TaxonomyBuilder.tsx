@@ -11,6 +11,7 @@ import {
 } from "@/lib/protocol/draft";
 import { variableFromJson } from "@/lib/protocol/format";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { pluralize } from "@/lib/i18n/format";
 import type { ProtocolVariable, TaxonomyNode } from "@/lib/protocol/types";
 import { TaxonomyNodeRow } from "./TaxonomyNodeRow";
 
@@ -109,12 +110,9 @@ export function TaxonomyBuilder({
               importButtonLabel}
           </h4>
           <p className="help-text" style={{ marginTop: 4 }}>
-            {t.wizard.taxonomy.summaryCategories.replace(
-              "{count}",
-              String(categoryCount)
-            )}
+            {pluralize(categoryCount, t.wizard.taxonomy.summaryCategories, t.wizard.taxonomy.summaryCategoriesSingular)}
             {" · "}
-            {t.wizard.taxonomy.summaryTerms.replace("{count}", String(termCount))}
+            {pluralize(termCount, t.wizard.taxonomy.summaryTerms, t.wizard.taxonomy.summaryTermsSingular)}
           </p>
         </div>
         <div className="taxonomy-builder-toolbar">

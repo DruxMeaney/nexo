@@ -38,8 +38,14 @@ export const dictionaries = {
     },
     landing: {
       eyebrow: "Revisión sistemática, minería de literatura y evidencia trazable",
+      heroTitlePrefix: "De PDFs a",
+      heroTitleEmphasis: "evidencia auditable",
       heroCopy:
         "Una interfaz local-first para ejecutar el pipeline de minería de literatura: revisa PDFs científicos, extrae menciones auditables, explora asociaciones textuales y prepara salidas listas para tablas, figuras y reportes.",
+      heroMetaLocal: "Local-first",
+      heroMetaVariables: "Variable A ↔ Variable B",
+      heroMetaEvidence: "PRISMA · evidencia textual",
+      heroMetaOutputs: ".docx + .csv + .zip",
       ctaStart: "Comenzar revisión",
       ctaResults: "Ver resultados existentes",
       heroImageAlt: "Visualización real generada por el pipeline",
@@ -77,6 +83,94 @@ export const dictionaries = {
         "La app distingue menciones, co-ocurrencias y asociaciones textuales. No afirma causalidad ni sustituye la evaluación crítica de los artículos.",
       cta: "Comenzar revisión"
     },
+    method: {
+      eyebrow: "Cómo funciona NEXO",
+      title: "El método paso a paso",
+      copy:
+        "El pipeline aplica reglas auditables sobre lexicones controlados. Cada etiqueta queda ligada a un fragmento textual que se puede leer y verificar. Aquí están las piezas que componen el proceso.",
+      backToStart: "Volver al inicio",
+      diagramTitle: "El pipeline en seis etapas",
+      diagramCopy:
+        "Cada etapa produce un artefacto trazable. Una mención no equivale a asociación; una co-ocurrencia no equivale a causalidad.",
+      stages: [
+        {
+          title: "1. Lectura del corpus",
+          desc: "PDFs, TXT o MD se convierten a texto y se asocian a metadatos (título, año, DOI, tipo de estudio)."
+        },
+        {
+          title: "2. Detección de secciones",
+          desc: "Patrones IMRaD identifican abstract, introducción, métodos, resultados, discusión y referencias."
+        },
+        {
+          title: "3. Extracción de menciones",
+          desc: "Términos del protocolo se buscan con regex bilingüe. Cada coincidencia guarda contexto, sentencia, sección y página."
+        },
+        {
+          title: "4. Pistas léxicas",
+          desc: "Cerca de cada mención se buscan pistas (exposición, dosis, asociación, especulación, negación) que ajustan su peso."
+        },
+        {
+          title: "5. Clasificación de rol",
+          desc: "Cada entidad por artículo recibe un rol: foco principal, secundario, contextual, bibliográfico o revisión."
+        },
+        {
+          title: "6. Relación A↔B",
+          desc: "Cuando A y B aparecen cerca, se emite una relación con evidencia textual, fuerza y nivel de confianza."
+        }
+      ],
+      glossaryTitle: "Glosario rápido",
+      glossary: [
+        {
+          term: "Variable A / Variable B",
+          desc: "Los dos ejes de tu revisión. Pueden ser contaminantes/enfermedades, fármacos/efectos, etc."
+        },
+        {
+          term: "Protocolo",
+          desc: "Carpeta con todas las decisiones de tu revisión: variables, pistas, pesos por sección y parámetros numéricos."
+        },
+        {
+          term: "Mención",
+          desc: "Coincidencia exacta de un término en un artículo, con sección y contexto guardados."
+        },
+        {
+          term: "Pista (cue)",
+          desc: "Palabra clave que aumenta o reduce el peso de una mención (dosis, asociación, especulación, negación)."
+        },
+        {
+          term: "Rol",
+          desc: "Cómo la entidad aparece en el artículo: foco principal, variable secundaria, mención contextual o bibliográfica."
+        },
+        {
+          term: "Asociación",
+          desc: "Etiqueta de la relación A↔B: fuerte, débil, especulativa o sin evidencia suficiente."
+        },
+        {
+          term: "Confianza",
+          desc: "Nivel agregado (alta/media/baja) que combina puntaje, sección y pistas de la evidencia."
+        },
+        {
+          term: "Evidencia textual",
+          desc: "Fragmento del PDF donde aparece la asociación. Se exporta para auditoría manual."
+        }
+      ],
+      outputsTitle: "Lo que vas a ver al final",
+      outputItems: [
+        {
+          title: "Tablas auditables",
+          desc: "CSV/XLSX con artículos, menciones, resúmenes por entidad, relaciones y tabla de revisión sistemática."
+        },
+        {
+          title: "Figuras vectoriales",
+          desc: "SVGs de frecuencia, heatmap por categoría, red bipartita, burbujas y mapa K-Means exploratorio."
+        },
+        {
+          title: "Reporte Word + paquete ZIP",
+          desc: "Documento con resumen ejecutivo, método y referencias; paquete descargable con todo lo generado."
+        }
+      ],
+      ctaStart: "Diseñar mi protocolo",
+      ctaViewResults: "Ver resultados de ejemplo"
+    },
     start: {
       eyebrow: "Paso 1 de tu revisión",
       title: "¿Cómo quieres comenzar?",
@@ -92,7 +186,11 @@ export const dictionaries = {
       loadCardCopy:
         "Si ya tienes una carpeta de protocolo, cárgala y solo selecciona la carpeta con tus PDFs para volver a ejecutar la extracción sobre un corpus actualizado.",
       loadCardCta: "Cargar protocolo",
-      tip: "Cada paso del diseñador permite, además, importar piezas sueltas de otro protocolo (solo las variables, solo las pistas, solo las secciones). Nada se reescribe sin necesidad."
+      tip: "Cada paso del diseñador permite, además, importar piezas sueltas de otro protocolo (solo las variables, solo las pistas, solo las secciones). Nada se reescribe sin necesidad.",
+      templatesTitle: "¿Prefieres aprender viendo un ejemplo?",
+      templatesCopy:
+        "Carga una plantilla precompletada y recorre el diseñador con todo lleno. Es la forma más rápida de entender cómo se ve cada paso en una revisión real.",
+      templateLoadCta: "Cargar este ejemplo"
     },
     newProtocol: {
       title: "Diseñador de protocolo",
@@ -104,6 +202,11 @@ export const dictionaries = {
       stepsLabel: "Pasos del diseñador"
     },
     wizard: {
+      firstVisitTitle: "Antes de empezar, 3 cosas útiles:",
+      firstVisitAutosave: "Tu progreso se guarda automáticamente en este navegador.",
+      firstVisitImport: "Cada paso permite importar piezas sueltas de otro protocolo (sólo variables, sólo pistas, etc.).",
+      firstVisitTemplate: "Si prefieres aprender viendo un ejemplo, vuelve al inicio y carga una plantilla.",
+      firstVisitDismiss: "Cerrar",
       navPrev: "Paso anterior",
       navNext: "Siguiente paso",
       navFinish: "Finalizar",
@@ -201,7 +304,9 @@ export const dictionaries = {
         fieldGenericHint:
           "Marca esto para términos amplios como “pesticidas” o “contaminantes orgánicos persistentes”.",
         summaryCategories: "{count} categorías",
+        summaryCategoriesSingular: "1 categoría",
         summaryTerms: "{count} términos",
+        summaryTermsSingular: "1 término",
         flatModeNotice:
           "Esta variable está en modo plano: sólo se añaden términos. Cambia a modo jerárquico en el paso anterior si necesitas categorías.",
         confirmDelete: "¿Eliminar este nodo y todo lo que contiene?"
@@ -321,7 +426,9 @@ export const dictionaries = {
           "Ya existe un protocolo con ese identificador. Marca “Sobrescribir” para reemplazarlo o cambia el identificador.",
         errorSaveFailed: "No se pudo guardar el protocolo.",
         countCategories: "{count} categorías",
+        countCategoriesSingular: "1 categoría",
         countTerms: "{count} términos",
+        countTermsSingular: "1 término",
         languageLabel: "Idioma del corpus",
         authorLabel: "Autor",
         descriptionLabel: "Descripción"
@@ -388,6 +495,47 @@ export const dictionaries = {
           "El tamaño de muestra de validación debe estar dentro del rango permitido."
       }
     },
+    results: {
+      eyebrow: "Resultados",
+      title: "Visualizador de evidencia",
+      copy:
+        "Navega figuras, tablas, documentos Word y paquetes descargables generados por el pipeline. La vista prioriza trazabilidad y revisión manual sobre conclusiones automáticas.",
+      protocolBanner: "Protocolo activo en este análisis",
+      protocolUnnamed: "(protocolo sin nombre)",
+      variableALabel: "Variable A:",
+      variableBLabel: "Variable B:",
+      folderPanelTitle: "Carpeta de resultados",
+      folderPanelHint:
+        "Usa la salida más reciente del pipeline o pega una carpeta generada previamente.",
+      refreshAction: "Actualizar",
+      pathLabel: "Ruta de salida",
+      errorTitle: "Error",
+      noTablePreview: "Selecciona una tabla para ver su vista previa.",
+      metricArticles: "Artículos",
+      metricMentions: "Menciones",
+      metricRelations: "Relaciones",
+      metricFigures: "Figuras",
+      tabFigures: "Figuras",
+      tabTables: "Tablas",
+      tabReports: "Reportes",
+      tabJson: "JSON",
+      downloadImage: "Descargar imagen",
+      downloadTable: "Descargar",
+      downloadReport: "Descargar Word",
+      downloadJson: "Descargar JSON",
+      noFigures: "Aún no hay figuras en esta carpeta.",
+      noTables: "Aún no hay tablas en esta carpeta.",
+      noReports: "Aún no hay reportes en esta carpeta.",
+      noJson: "Aún no hay archivos JSON en esta carpeta.",
+      kind: {
+        figure: "Figura",
+        table: "Tabla",
+        report: "Reporte",
+        package: "Paquete",
+        json: "JSON",
+        other: "Archivo"
+      }
+    },
     loadProtocol: {
       title: "Cargar protocolo existente",
       eyebrow: "Reutiliza una revisión guardada",
@@ -420,7 +568,8 @@ export const dictionaries = {
       protocolHeaderEmpty: "(protocolo sin nombre)",
       variableLabel: "Variable",
       termsCount: "{count} términos",
-      paramSummary: "Contexto {context} · Distancia A↔B {relation} · K-Means k={k}",
+      termsCountSingular: "1 término",
+      paramSummary: "Contexto {context} caracteres · Distancia A↔B {relation} caracteres · K-Means k={k}",
       inputFolderLabel: "Carpeta con PDFs",
       inputFolderPlaceholder: "Ej. /Users/.../Articulos",
       inputFolderHint:
@@ -484,8 +633,14 @@ export const dictionaries = {
     },
     landing: {
       eyebrow: "Systematic review, literature mining and traceable evidence",
+      heroTitlePrefix: "From PDFs to",
+      heroTitleEmphasis: "auditable evidence",
       heroCopy:
         "A local-first interface to run the literature mining pipeline: review scientific PDFs, extract auditable mentions, explore textual associations, and prepare outputs ready for tables, figures and reports.",
+      heroMetaLocal: "Local-first",
+      heroMetaVariables: "Variable A ↔ Variable B",
+      heroMetaEvidence: "PRISMA · textual evidence",
+      heroMetaOutputs: ".docx + .csv + .zip",
       ctaStart: "Start a review",
       ctaResults: "View existing results",
       heroImageAlt: "Real visualization generated by the pipeline",
@@ -523,6 +678,94 @@ export const dictionaries = {
         "The app distinguishes mentions, co-occurrences and textual associations. It does not claim causality nor replace critical evaluation of the articles.",
       cta: "Start a review"
     },
+    method: {
+      eyebrow: "How NEXO works",
+      title: "The method, step by step",
+      copy:
+        "The pipeline applies auditable rules over controlled lexicons. Every label is tied to a textual fragment the reviewer can re-read and verify. Here are the pieces that make up the process.",
+      backToStart: "Back to start",
+      diagramTitle: "The pipeline in six stages",
+      diagramCopy:
+        "Every stage produces a traceable artifact. A mention is not an association; a co-occurrence is not causality.",
+      stages: [
+        {
+          title: "1. Corpus reading",
+          desc: "PDFs, TXT or MD are converted to text and matched against metadata (title, year, DOI, study type)."
+        },
+        {
+          title: "2. Section detection",
+          desc: "IMRaD patterns identify abstract, introduction, methods, results, discussion and references."
+        },
+        {
+          title: "3. Mention extraction",
+          desc: "Protocol terms are matched with bilingual regex. Every hit stores context, sentence, section and page."
+        },
+        {
+          title: "4. Lexical cues",
+          desc: "Cues near each mention (exposure, dose, association, speculation, negation) adjust its weight."
+        },
+        {
+          title: "5. Role classification",
+          desc: "Each entity per article receives a role: primary focus, secondary, contextual, bibliographic or review-only."
+        },
+        {
+          title: "6. A↔B relation",
+          desc: "When A and B appear close enough, a relation is emitted with textual evidence, strength and confidence."
+        }
+      ],
+      glossaryTitle: "Quick glossary",
+      glossary: [
+        {
+          term: "Variable A / Variable B",
+          desc: "The two axes of your review. Could be contaminants/diseases, drugs/effects, etc."
+        },
+        {
+          term: "Protocol",
+          desc: "Folder with every decision of your review: variables, cues, per-section weights, numeric parameters."
+        },
+        {
+          term: "Mention",
+          desc: "An exact match of a term in an article, with section and context preserved."
+        },
+        {
+          term: "Cue",
+          desc: "Keyword that raises or lowers a mention's weight (dose, association, speculation, negation)."
+        },
+        {
+          term: "Role",
+          desc: "How an entity shows up: primary focus, secondary variable, contextual mention or bibliographic."
+        },
+        {
+          term: "Association",
+          desc: "Label of the A↔B relation: strong, weak, speculative or insufficient evidence."
+        },
+        {
+          term: "Confidence",
+          desc: "Aggregated level (high/medium/low) combining score, section and cues from the evidence."
+        },
+        {
+          term: "Textual evidence",
+          desc: "The fragment of the PDF where the association appears. Exported for manual auditing."
+        }
+      ],
+      outputsTitle: "What you'll see in the end",
+      outputItems: [
+        {
+          title: "Auditable tables",
+          desc: "CSV/XLSX with articles, mentions, entity summaries, relations and the systematic-review table."
+        },
+        {
+          title: "Vector figures",
+          desc: "SVGs for frequency, category heatmap, bipartite network, bubbles and exploratory K-Means map."
+        },
+        {
+          title: "Word report + ZIP package",
+          desc: "Document with executive summary, method and references; downloadable package with everything."
+        }
+      ],
+      ctaStart: "Design my protocol",
+      ctaViewResults: "View sample results"
+    },
     start: {
       eyebrow: "Step 1 of your review",
       title: "How do you want to start?",
@@ -538,7 +781,11 @@ export const dictionaries = {
       loadCardCopy:
         "If you already have a protocol folder, load it and just pick the folder with your PDFs to re-run the extraction on an updated corpus.",
       loadCardCta: "Load protocol",
-      tip: "Every step of the designer also lets you import individual pieces from another protocol (only the variables, only the cues, only the sections). Nothing gets rewritten unnecessarily."
+      tip: "Every step of the designer also lets you import individual pieces from another protocol (only the variables, only the cues, only the sections). Nothing gets rewritten unnecessarily.",
+      templatesTitle: "Prefer to learn by example?",
+      templatesCopy:
+        "Load a pre-filled template and walk through the designer with everything populated. It's the fastest way to see what each step looks like for a real review.",
+      templateLoadCta: "Load this example"
     },
     newProtocol: {
       title: "Protocol designer",
@@ -550,6 +797,11 @@ export const dictionaries = {
       stepsLabel: "Designer steps"
     },
     wizard: {
+      firstVisitTitle: "Before you start, 3 useful things:",
+      firstVisitAutosave: "Your progress is saved automatically in this browser.",
+      firstVisitImport: "Every step lets you import individual pieces from another protocol (only variables, only cues, etc.).",
+      firstVisitTemplate: "If you prefer to learn by example, go back to the start and load a template.",
+      firstVisitDismiss: "Dismiss",
       navPrev: "Previous step",
       navNext: "Next step",
       navFinish: "Finish",
@@ -647,7 +899,9 @@ export const dictionaries = {
         fieldGenericHint:
           "Tick this for broad terms like “pesticides” or “persistent organic pollutants”.",
         summaryCategories: "{count} categories",
+        summaryCategoriesSingular: "1 category",
         summaryTerms: "{count} terms",
+        summaryTermsSingular: "1 term",
         flatModeNotice:
           "This variable is in flat mode: only terms are allowed. Switch to hierarchical mode in the previous step if you need categories.",
         confirmDelete: "Delete this node and everything inside it?"
@@ -769,7 +1023,9 @@ export const dictionaries = {
           "A protocol with that identifier already exists. Tick “Overwrite” to replace it, or change the identifier.",
         errorSaveFailed: "Could not save the protocol.",
         countCategories: "{count} categories",
+        countCategoriesSingular: "1 category",
         countTerms: "{count} terms",
+        countTermsSingular: "1 term",
         languageLabel: "Corpus language",
         authorLabel: "Author",
         descriptionLabel: "Description"
@@ -836,6 +1092,47 @@ export const dictionaries = {
           "The validation sample size must be inside the allowed range."
       }
     },
+    results: {
+      eyebrow: "Results",
+      title: "Evidence viewer",
+      copy:
+        "Browse figures, tables, Word documents and downloadable packages generated by the pipeline. The view prioritises traceability and manual review over automatic conclusions.",
+      protocolBanner: "Active protocol in this analysis",
+      protocolUnnamed: "(unnamed protocol)",
+      variableALabel: "Variable A:",
+      variableBLabel: "Variable B:",
+      folderPanelTitle: "Results folder",
+      folderPanelHint:
+        "Use the most recent pipeline output or paste a previously generated folder.",
+      refreshAction: "Refresh",
+      pathLabel: "Output path",
+      errorTitle: "Error",
+      noTablePreview: "Select a table to preview it.",
+      metricArticles: "Articles",
+      metricMentions: "Mentions",
+      metricRelations: "Relations",
+      metricFigures: "Figures",
+      tabFigures: "Figures",
+      tabTables: "Tables",
+      tabReports: "Reports",
+      tabJson: "JSON",
+      downloadImage: "Download image",
+      downloadTable: "Download",
+      downloadReport: "Download Word",
+      downloadJson: "Download JSON",
+      noFigures: "No figures in this folder yet.",
+      noTables: "No tables in this folder yet.",
+      noReports: "No reports in this folder yet.",
+      noJson: "No JSON files in this folder yet.",
+      kind: {
+        figure: "Figure",
+        table: "Table",
+        report: "Report",
+        package: "Package",
+        json: "JSON",
+        other: "File"
+      }
+    },
     loadProtocol: {
       title: "Load existing protocol",
       eyebrow: "Reuse a saved review",
@@ -868,7 +1165,8 @@ export const dictionaries = {
       protocolHeaderEmpty: "(unnamed protocol)",
       variableLabel: "Variable",
       termsCount: "{count} terms",
-      paramSummary: "Context {context} · A↔B distance {relation} · K-Means k={k}",
+      termsCountSingular: "1 term",
+      paramSummary: "Context {context} characters · A↔B distance {relation} characters · K-Means k={k}",
       inputFolderLabel: "PDF folder",
       inputFolderPlaceholder: "e.g. /Users/.../Articulos",
       inputFolderHint:

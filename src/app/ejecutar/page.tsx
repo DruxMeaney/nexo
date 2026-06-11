@@ -46,7 +46,7 @@ export default async function ExecutePage({
 
   const t = await getDictionary();
   return (
-    <AppShell>
+    <AppShell showFooterCta={false}>
       <main>
         <section className="page-title">
           <p className="eyebrow" style={{ color: "var(--rust)" }}>
@@ -95,7 +95,7 @@ async function ExecuteErrorPage({
 }) {
   const t = await getDictionary();
   return (
-    <AppShell>
+    <AppShell showFooterCta={false}>
       <main>
         <section className="page-title">
           <h1>{t.execute.title}</h1>

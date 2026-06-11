@@ -30,7 +30,9 @@ export default async function Home() {
           />
           <div className="hero-content">
             <p className="eyebrow">{t.landing.eyebrow}</p>
-            <h1>{t.common.brand}</h1>
+            <h1>
+              {t.landing.heroTitlePrefix} <em>{t.landing.heroTitleEmphasis}</em>
+            </h1>
             <p className="hero-copy">{t.landing.heroCopy}</p>
             <div className="hero-actions">
               <Link className="button" href="/comenzar">
@@ -42,69 +44,87 @@ export default async function Home() {
               </Link>
             </div>
           </div>
+          <div className="hero-meta" aria-hidden="true">
+            <div className="hero-meta-inner">
+              <span>
+                <ShieldCheck size={14} color="#a7d0c6" />
+                {t.landing.heroMetaLocal}
+              </span>
+              <span>{t.landing.heroMetaVariables}</span>
+              <span>{t.landing.heroMetaEvidence}</span>
+              <span>{t.landing.heroMetaOutputs}</span>
+            </div>
+          </div>
         </section>
 
         <section id="metodo" className="section">
           <div className="section-heading">
             <div>
-              <p className="eyebrow" style={{ color: "var(--teal-dark)" }}>
-                {t.landing.methodEyebrow}
-              </p>
+              <span className="section-index">01 — Método</span>
+              <p className="eyebrow dark">{t.landing.methodEyebrow}</p>
               <h2>{t.landing.methodTitle}</h2>
               <p>{t.landing.methodCopy}</p>
             </div>
           </div>
           <div className="info-grid">
-            <article className="card">
-              <FileText size={24} color="var(--teal-dark)" />
+            <article className="card lift">
+              <span className="card-ic">
+                <FileText size={22} />
+              </span>
               <h3>{t.landing.cardCorpusTitle}</h3>
               <p>{t.landing.cardCorpusCopy}</p>
             </article>
-            <article className="card">
-              <Table2 size={24} color="var(--rust)" />
+            <article className="card lift">
+              <span className="card-ic" style={{ background: "#f7ebe3", color: "var(--rust)" }}>
+                <Table2 size={22} />
+              </span>
               <h3>{t.landing.cardExtractTitle}</h3>
               <p>{t.landing.cardExtractCopy}</p>
             </article>
-            <article className="card">
-              <BarChart3 size={24} color="var(--blue)" />
+            <article className="card lift">
+              <span className="card-ic" style={{ background: "#e8eff6", color: "var(--blue)" }}>
+                <BarChart3 size={22} />
+              </span>
               <h3>{t.landing.cardVisualTitle}</h3>
               <p>{t.landing.cardVisualCopy}</p>
             </article>
           </div>
         </section>
 
-        <section className="section compact">
-          <div className="panel">
-            <div className="section-heading">
-              <div>
-                <p className="eyebrow" style={{ color: "var(--teal-dark)" }}>
-                  {t.landing.privacyEyebrow}
-                </p>
-                <h2>{t.landing.privacyTitle}</h2>
-                <p>{t.landing.privacyCopy}</p>
-              </div>
-              <ShieldCheck size={42} color="var(--olive)" />
+        <div className="rule" />
+
+        <section className="section">
+          <div className="section-heading">
+            <div>
+              <span className="section-index">02 — Privacidad</span>
+              <p className="eyebrow dark">{t.landing.privacyEyebrow}</p>
+              <h2>{t.landing.privacyTitle}</h2>
+              <p>{t.landing.privacyCopy}</p>
             </div>
-            <div className="info-grid">
-              <div>
-                <span className="badge">{t.landing.badgeLocal}</span>
-                <p style={{ marginTop: 10 }}>{t.landing.badgeLocalCopy}</p>
-              </div>
-              <div>
-                <span className="badge">{t.landing.badgeTraceable}</span>
-                <p style={{ marginTop: 10 }}>{t.landing.badgeTraceableCopy}</p>
-              </div>
-              <div>
-                <span className="badge">{t.landing.badgeDownloadable}</span>
-                <p style={{ marginTop: 10 }}>{t.landing.badgeDownloadableCopy}</p>
-              </div>
+            <ShieldCheck size={46} color="var(--olive)" />
+          </div>
+          <div className="info-grid">
+            <div className="card">
+              <span className="badge">{t.landing.badgeLocal}</span>
+              <p style={{ marginTop: 14 }}>{t.landing.badgeLocalCopy}</p>
+            </div>
+            <div className="card">
+              <span className="badge">{t.landing.badgeTraceable}</span>
+              <p style={{ marginTop: 14 }}>{t.landing.badgeTraceableCopy}</p>
+            </div>
+            <div className="card">
+              <span className="badge">{t.landing.badgeDownloadable}</span>
+              <p style={{ marginTop: 14 }}>{t.landing.badgeDownloadableCopy}</p>
             </div>
           </div>
         </section>
 
-        <section className="section compact">
+        <div className="rule" />
+
+        <section className="section">
           <div className="section-heading">
             <div>
+              <span className="section-index">03 — Salidas</span>
               <h2>{t.landing.outputsTitle}</h2>
               <p>{t.landing.outputsCopy}</p>
             </div>
