@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "savedAt": "2026-06-11T17:08:22.153Z",
+  "draftVersion": 1,
+  "identity": {
+    "name": "Smoke test - Contaminantes y enfermedades",
+    "description": "Audit run",
+    "author": "NEXO QA",
+    "corpusLanguage": "bilingual"
+  },
+  "analysis": {
+    "contextRadius": 260,
+    "kwicRadius": 160,
+    "relationDistance": 900,
+    "kmeansK": 4,
+    "validationSampleSize": 200
+  },
+  "manifest": {
+    "variableA": "variables/variable_a.json",
+    "variableB": "variables/variable_b.json",
+    "cues": {
+      "exposure": "cues/exposure.json",
+      "dose": "cues/dose.json",
+      "association": "cues/association.json",
+      "strongAssociation": "cues/strong_association.json",
+      "speculative": "cues/speculative.json",
+      "negation": "cues/negation.json",
+      "review": "cues/review.json",
+      "human": "cues/human.json",
+      "inVivo": "cues/in_vivo.json",
+      "inVitro": "cues/in_vitro.json"
+    },
+    "sections": "sections.json"
+  }
+}

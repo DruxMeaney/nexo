@@ -1,0 +1,7 @@
+{
+  "id": "inVitro",
+  "patterns": [
+    "\\b(in vitro|cell line|cells|culture|cultured|sh-sy5y|pc12|neuroblastoma)\\b",
+    "\\b(c[eé]lulas?|cultivo celular|l[ií]nea celular)\\b"
+  ]
+}

@@ -1,0 +1,21 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>Form inputs</title><link rel="stylesheet" href="_card.css">
+<style>
+  .field{display:grid;gap:7px;flex:1;}
+  label{font-size:.86rem;font-weight:720;}
+  input,select{width:100%;min-height:44px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink);padding:0 12px;font-size:.92rem;}
+  .focus{outline:2px solid rgba(15,111,106,.2);border-color:rgba(15,111,106,.55);}
+  .picker{display:grid;grid-template-columns:46px 1fr;min-height:46px;overflow:hidden;border:1px solid var(--line);border-radius:8px;background:#fff;}
+  .picker .ic{display:grid;place-items:center;background:#f1f7f4;color:#0a4d4a;border-right:1px solid var(--line);}
+  .picker input{border:0;min-height:auto;}
+  svg{width:18px;height:18px;}
+</style></head>
+<body>
+  <div class="row" style="align-items:end;gap:14px;">
+    <div class="field"><label>Nombre del protocolo</label><input class="focus" value="Contaminantes y enfermedades"></div>
+    <div class="field"><label>Idioma del corpus</label><select><option>Bilingüe (ES + EN)</option></select></div>
+  </div>
+  <div class="field"><label>Carpeta con PDFs</label>
+    <div class="picker"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg></span><input value="/Users/.../Articulos"></div>
+  </div>
+</body></html>

@@ -1,0 +1,7 @@
+{
+  "id": "review",
+  "patterns": [
+    "\\b(review|systematic review|narrative review|meta[-\\s]?analysis)\\b",
+    "\\b(revisi[oó]n|metaan[aá]lisis)\\b"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "id": "negation",
+  "patterns": [
+    "\\b(not associated|no association|not significant|failed to find|without association)\\b",
+    "\\b(no se asoci[oó]|sin asociaci[oó]n|no significativo|no hubo asociaci[oó]n)\\b"
+  ]
+}

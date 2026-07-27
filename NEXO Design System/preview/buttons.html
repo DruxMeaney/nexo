@@ -1,0 +1,23 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>Buttons</title><link rel="stylesheet" href="_card.css">
+<style>
+  .btn{display:inline-flex;min-height:40px;align-items:center;gap:8px;border-radius:7px;padding:0 14px;border:1px solid transparent;font-weight:650;cursor:pointer;font-size:.92rem;}
+  .primary{background:#0a4d4a;border-color:#0a4d4a;color:#fff;}
+  .secondary{background:#fff;border-color:#d9dfd8;color:#18201c;}
+  .ghost{background:transparent;color:#5d675f;}
+  .disabled{background:#0a4d4a;border-color:#0a4d4a;color:#fff;opacity:.58;}
+  .ic{display:inline-grid;width:40px;height:40px;place-items:center;border:1px solid #d9dfd8;border-radius:7px;background:#fff;color:#0a4d4a;}
+  svg{width:17px;height:17px;}
+</style></head>
+<body>
+  <div class="row">
+    <button class="btn primary">Comenzar revisión <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+    <button class="btn secondary">Ver resultados</button>
+    <button class="btn ghost">Volver</button>
+  </div>
+  <div class="row">
+    <button class="btn disabled">Iniciando…</button>
+    <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
+    <span class="cap" style="margin-left:4px;">primary · secondary · ghost · disabled · icon-button</span>
+  </div>
+</body></html>

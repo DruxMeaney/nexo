@@ -1,0 +1,9 @@
+{
+  "id": "association",
+  "patterns": [
+    "\\b(associated\\s+with|association\\s+between|increased\\s+risk|decreased\\s+risk|higher\\s+risk)\\b",
+    "\\b(odds\\s+ratio|hazard\\s+ratio|relative\\s+risk|risk\\s+of|correlated\\s+with|linked\\s+to)\\b",
+    "\\b(induced|induces|caused|causes|elicits|evokes|impairs|alters|attenuates)\\b",
+    "\\b(asociad[oa]\\s+con|asociaci[oó]n\\s+entre|mayor\\s+riesgo|riesgo\\s+de|correlacionad[oa])\\b"
+  ]
+}

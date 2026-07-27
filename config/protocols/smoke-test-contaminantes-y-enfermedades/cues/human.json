@@ -1,0 +1,8 @@
+{
+  "id": "human",
+  "patterns": [
+    "\\b(human|humans|patients?|participants?|cohort|case[-\\s]?control|population)\\b",
+    "\\b(epidemiological|epidemiologic|registry|biobank)\\b",
+    "\\b(pacientes?|participantes?|cohorte|poblaci[oó]n|epidemiol[oó]gic[oa])\\b"
+  ]
+}

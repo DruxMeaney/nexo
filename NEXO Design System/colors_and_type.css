@@ -1,0 +1,197 @@
+/* ==========================================================================
+   NEXO — Colors & Type foundations  ·  v2 "Editorial"
+   Palette extracted verbatim from the product (src/app/globals.css).
+   Typography is an elevated, curated selection — a sophisticated evolution of
+   the shipped product (which used Inter). "Minería de datos para revisiones."
+   ========================================================================== */
+
+/* ---- Webfonts ------------------------------------------------------------
+   The original product shipped Inter. This design system elevates it to an
+   editorial pairing that suits a literature-review instrument:
+
+     · Newsreader     — literary serif for display/headlines (journal voice)
+     · Hanken Grotesk — humanist grotesque for UI, labels & body text
+     · JetBrains Mono — monospace for paths, regex, data & live logs
+
+   Pull them from Google Fonts when recreating screens:
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+--------------------------------------------------------------------------- */
+
+:root {
+  /* ---- Core palette (raw brand tokens) ---- */
+  --bg:            #f7f8f5;  /* warm off-white app canvas              */
+  --surface:       #ffffff;  /* cards, panels, inputs                  */
+  --surface-muted: #eef2ec;  /* inert chips, status dots               */
+  --ink:           #18201c;  /* near-black forest green — body text    */
+  --muted:         #5d675f;  /* secondary text, captions               */
+  --line:          #d9dfd8;  /* hairline borders, dividers             */
+
+  /* ---- Accent palette (earthy / scientific) ---- */
+  --teal:          #0f6f6a;  /* primary brand accent                   */
+  --teal-dark:     #0a4d4a;  /* primary button / strong accent         */
+  --teal-hover:    #073b38;  /* primary button hover                   */
+  --rust:          #a84c24;  /* secondary accent (warm, "load" flows)  */
+  --olive:         #627c35;  /* success / completed / privacy          */
+  --blue:          #315f8a;  /* tertiary accent (data / JSON)          */
+  --warning:       #8a5b12;  /* caution copy                           */
+  --danger:        #9c2f2f;  /* errors, invalid fields                 */
+
+  /* ---- Hero / dark surfaces ---- */
+  --hero-bg:       #0d1816;  /* dark forest hero canvas                */
+  --hero-bg-2:     #0a1715;  /* hero overlay gradient stop             */
+  --log-bg:        #101816;  /* live-log / terminal panels             */
+  --log-ink:       #dce8e0;  /* text on dark panels                    */
+
+  /* ---- Tints (used as soft fills behind accents) ---- */
+  --tint-teal:     #e9f5f2;  /* active tabs, teal status               */
+  --tint-teal-2:   #f3faf7;  /* gradient panel bottom                  */
+  --tint-olive:    #eaf4df;  /* completed status                       */
+  --tint-rust:     #f9ece4;  /* rust icon wells                        */
+  --tint-warning:  #fff8e7;  /* notice background                      */
+  --tint-danger:   #f8e7e4;  /* failed status                          */
+
+  /* ---- Elevation ---- */
+  --shadow-flush:  0 1px 0 rgba(24, 32, 28, 0.03);   /* cards at rest  */
+  --shadow-card:   0 14px 38px rgba(24, 32, 28, 0.08); /* row hover     */
+  --shadow-lift:   0 24px 70px rgba(24, 32, 28, 0.12); /* welcome cards */
+  --shadow-hi:     0 28px 80px rgba(24, 32, 28, 0.16); /* card hover    */
+
+  /* ---- Radii ---- */
+  --r-sm:  6px;   /* small inputs, figure frames        */
+  --r-md:  7px;   /* buttons, inputs, chips             */
+  --r-lg:  8px;   /* cards, panels, badges-as-box       */
+  --r-xl:  12px;  /* welcome cards, runner headers      */
+  --r-pill: 999px;/* badges, locale toggle, status pills*/
+
+  /* ---- Type families ---- */
+  --font-serif: "Newsreader", ui-serif, Georgia, "Times New Roman", serif; /* display */
+  --font-sans:  "Hanken Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; /* UI + body */
+  --font-mono:  "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", ui-monospace, monospace;
+
+  /* ---- Type scale (clamp() = fluid) ---- */
+  --fs-hero:    clamp(3.2rem, 7.5vw, 6rem);  /* serif h1 on hero — lh 1.0    */
+  --fs-display: clamp(2rem, 4vw, 3rem);      /* serif section h2 — lh 1.05   */
+  --fs-h3:      1.5rem;                        /* serif welcome / protocol     */
+  --fs-lead:    1.15rem;                       /* lead copy        — lh 1.6    */
+  --fs-body:    1rem;                          /* base body        — lh 1.65   */
+  --fs-sm:      0.875rem;                       /* help text, captions          */
+  --fs-eyebrow: 0.72rem;                        /* uppercase kicker             */
+  --fs-mono:    0.84rem;
+
+  /* ---- Weights ----
+     Serif (Newsreader) reads elegant at 400–500; never bold it heavily.
+     Grotesque (Hanken) carries the UI weight at 500–700. */
+  --w-regular: 400;
+  --w-medium:  500;  /* serif display, lead copy      */
+  --w-semi:    600;  /* buttons, nav, labels, eyebrow */
+  --w-bold:    700;  /* table headers, strong UI      */
+
+  /* ---- Editorial details ---- */
+  --tracking-eyebrow: 0.14em;  /* generous letter-spacing on kickers */
+  --tracking-tight:  -0.02em;  /* big serif display                  */
+}
+
+/* ==========================================================================
+   Semantic type roles — apply these classes or copy the rules.
+   ========================================================================== */
+
+.nx-eyebrow {
+  font-family: var(--font-sans);
+  font-size: var(--fs-eyebrow);
+  font-weight: var(--w-semi);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--teal-dark);
+  margin: 0 0 18px;
+}
+/* Editorial eyebrow with a leading hairline rule */
+.nx-eyebrow--rule {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.nx-eyebrow--rule::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.nx-h1 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-hero);
+  line-height: 1.0;
+  letter-spacing: var(--tracking-tight);
+  margin: 0;
+  font-weight: var(--w-medium);
+}
+
+.nx-h2 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-display);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  margin: 0;
+  font-weight: var(--w-medium);
+}
+
+.nx-h3 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
+  line-height: 1.2;
+  margin: 0;
+  font-weight: var(--w-medium);
+}
+
+/* Optional italic serif for editorial emphasis inside running heads */
+.nx-em {
+  font-style: italic;
+  font-weight: var(--w-medium);
+}
+
+.nx-lead {
+  font-family: var(--font-sans);
+  font-size: var(--fs-lead);
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0;
+}
+
+.nx-body {
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: 1.65;
+  color: var(--ink);
+}
+
+.nx-muted { color: var(--muted); }
+
+.nx-help {
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.nx-mono {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  letter-spacing: -0.01em;
+}
+
+/* Section index numeral — small editorial "01 / 02" marker */
+.nx-index {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  font-weight: var(--w-medium);
+  color: var(--teal);
+  letter-spacing: 0.04em;
+}
+
+html, body {
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background: var(--bg);
+}

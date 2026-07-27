@@ -1,0 +1,21 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>Tabs & toggle</title><link rel="stylesheet" href="_card.css">
+<style>
+  .tab{display:inline-flex;align-items:center;gap:7px;min-height:38px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--muted);padding:0 12px;cursor:pointer;font-size:.9rem;}
+  .tab.active{border-color:rgba(15,111,106,.5);background:#e9f5f2;color:#0a4d4a;font-weight:720;}
+  .locale{display:inline-flex;align-items:center;gap:2px;padding:4px 6px;border:1px solid var(--line);border-radius:999px;background:#fff;}
+  .opt{min-width:28px;min-height:26px;padding:0 8px;border:0;border-radius:999px;background:transparent;color:var(--muted);font-size:.78rem;font-weight:720;letter-spacing:.04em;cursor:pointer;}
+  .opt.active{background:#0a4d4a;color:#fff;}
+</style></head>
+<body>
+  <div class="row">
+    <button class="tab active">Figuras</button>
+    <button class="tab">Tablas</button>
+    <button class="tab">Reportes</button>
+    <button class="tab">JSON</button>
+  </div>
+  <div class="row">
+    <span class="locale"><button class="opt active">ES</button><button class="opt">EN</button></span>
+    <span class="cap" style="margin-left:6px;">tabs · locale toggle</span>
+  </div>
+</body></html>

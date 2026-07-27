@@ -1,0 +1,21 @@
+/* Shared styling for NEXO design-system preview cards (v2 Editorial) */
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root{
+  --bg:#f6f7f3;--surface:#fff;--surface-muted:#eef2ec;--ink:#18201c;--muted:#5d675f;--line:#dde2da;
+  --teal:#0f6f6a;--teal-dark:#0a4d4a;--teal-hover:#073b38;--rust:#a84c24;--olive:#627c35;--blue:#315f8a;
+  --warning:#8a5b12;--danger:#9c2f2f;--hero-bg:#0c1614;--log-bg:#0c1614;--paper:#f1ede3;
+  --tint-teal:#e9f3ee;--tint-olive:#ebf3df;--tint-rust:#f7ebe3;--tint-warning:#fdf7e9;--tint-danger:#f8e7e4;
+  --font-serif:"Newsreader",ui-serif,Georgia,serif;
+  --font-sans:"Hanken Grotesk",ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,"Liberation Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--font-sans);
+  padding:22px;display:flex;flex-direction:column;justify-content:center;gap:14px;
+}
+.row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.cap{font-size:.66rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.mono{font-family:var(--font-mono);font-size:.74rem;}

@@ -1,0 +1,17 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>Badges & chips</title><link rel="stylesheet" href="_card.css">
+<style>
+  .badge{display:inline-flex;min-height:26px;align-items:center;border-radius:999px;background:#edf4ef;color:#21473d;padding:0 9px;font-size:.78rem;font-weight:720;}
+  .chip{display:inline-flex;min-height:30px;align-items:center;border:1px solid rgba(15,111,106,.18);border-radius:999px;background:#eef8f5;color:#0a4d4a;padding:0 11px;font-size:.85rem;font-weight:690;}
+  .kind{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font-size:.74rem;font-weight:720;letter-spacing:.04em;text-transform:uppercase;}
+  .is-cat{background:#e7f4ef;color:#0a4d4a;}
+  .is-term{background:#f9ece4;color:#a84c24;}
+  .pill{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:.78rem;font-weight:720;text-transform:uppercase;letter-spacing:.04em;}
+</style></head>
+<body>
+  <div class="row"><span class="badge">Local</span><span class="badge">Trazable</span><span class="badge">Descargable</span><span class="cap" style="margin-left:6px;">badge</span></div>
+  <div class="row"><span class="chip">Métodos</span><span class="chip">Resultados</span><span class="chip">Discusión</span><span class="cap" style="margin-left:6px;">section-chip</span></div>
+  <div class="row"><span class="kind is-cat">Categoría</span><span class="kind is-term">Término</span>
+    <span class="pill" style="background:#e4f3ef;color:#0a4d4a;">En ejecución</span>
+    <span class="pill" style="background:#eaf4df;color:#21473d;">Completado</span></div>
+</body></html>

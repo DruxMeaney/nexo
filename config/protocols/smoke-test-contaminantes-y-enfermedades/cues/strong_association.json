@@ -1,0 +1,8 @@
+{
+  "id": "strongAssociation",
+  "patterns": [
+    "\\b(increased\\s+risk|decreased\\s+risk|higher\\s+risk|hazard\\s+ratio|odds\\s+ratio|relative\\s+risk)\\b",
+    "\\b(significant(?:ly)?|associated\\s+with|association\\s+between|induced|induces|elicits|evokes|impairs)\\b",
+    "\\b(mayor\\s+riesgo|riesgo\\s+elevado|asociad[oa]\\s+con|significativ[oa])\\b"
+  ]
+}

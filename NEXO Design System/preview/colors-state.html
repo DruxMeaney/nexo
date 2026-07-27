@@ -1,0 +1,20 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<title>State colors</title><link rel="stylesheet" href="_card.css">
+<style>
+  .sw{display:flex;flex-direction:column;gap:7px;flex:1;}
+  .chip{height:42px;border-radius:7px;border:1px solid rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;}
+  .name{font-size:.74rem;font-weight:700;}
+  .hex{font-family:var(--font-mono);font-size:.68rem;color:var(--muted);}
+</style></head>
+<body>
+  <div class="row" style="gap:12px;align-items:stretch;">
+    <div class="sw"><div class="chip" style="background:#8a5b12;color:#fff">warning</div><div class="hex">#8a5b12 · on #fff8e7</div></div>
+    <div class="sw"><div class="chip" style="background:#9c2f2f;color:#fff">danger</div><div class="hex">#9c2f2f · on #f8e7e4</div></div>
+    <div class="sw"><div class="chip" style="background:#627c35;color:#fff">success</div><div class="hex">#627c35 · on #eaf4df</div></div>
+  </div>
+  <div class="row" style="gap:12px;align-items:stretch;margin-top:2px;">
+    <div class="sw"><div class="chip" style="background:#fff8e7;color:#4b3820;border-color:rgba(138,91,18,.28)">tint warning</div></div>
+    <div class="sw"><div class="chip" style="background:#f8e7e4;color:#9c2f2f;border-color:rgba(156,47,47,.22)">tint danger</div></div>
+    <div class="sw"><div class="chip" style="background:#eaf4df;color:#21473d;border-color:rgba(98,124,53,.3)">tint success</div></div>
+  </div>
+</body></html>

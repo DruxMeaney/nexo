@@ -1,0 +1,11 @@
+{
+  "id": "exposure",
+  "patterns": [
+    "\\b(exposed|exposure|treated|treatment|administered|administration)\\b",
+    "\\b(dose|doses|dosage|concentration|concentrations|levels?|measured|measurement)\\b",
+    "\\b(drinking\\s+water|well[-\\s]?water|waterborne|contaminated\\s+water|contaminated\\s+drinking\\s+water)\\b",
+    "\\b(serum|urine|urinary|blood|brain|groups?|control\\s+group|oral|gavage|ad\\s+libitum)\\b",
+    "\\b(expos(?:ición|iciones))\\b",
+    "\\b(ensayo|grupo|control|tratad[oa]s?|expuest[oa]s?|concentraci[oó]n|dosis)\\b"
+  ]
+}

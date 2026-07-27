@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXO — Iconography (lucide)</title>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f7f8f5;--surface:#fff;--ink:#18201c;--muted:#5d675f;--line:#d9dfd8;
+    --teal-dark:#0a4d4a;--rust:#a84c24;--olive:#627c35;--blue:#315f8a;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hanken Grotesk",system-ui,sans-serif;padding:36px;}
+  h1{font-size:1.1rem;font-weight:600;margin:0 0 4px;}
+  p{color:var(--muted);font-size:.86rem;margin:0 0 24px;line-height:1.5;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;}
+  .cell{display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 10px;
+    background:var(--surface);border:1px solid var(--line);border-radius:8px;}
+  .cell i{color:var(--teal-dark);}
+  .cell span{font-size:.74rem;color:var(--muted);font-family:"JetBrains Mono",Consolas,monospace;}
+  .cell.rust i{color:var(--rust);}
+  .cell.olive i{color:var(--olive);}
+  .cell.blue i{color:var(--blue);}
+</style>
+</head>
+<body>
+  <h1>Iconography — lucide, 2px rounded stroke</h1>
+  <p>NEXO uses lucide-react exclusively, tinted with brand accents. Load from CDN and call lucide.createIcons().</p>
+  <div class="grid" id="grid"></div>
+
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    const icons = [
+      ["network","brand"],["arrow-right",""],["arrow-left",""],["play-circle",""],
+      ["play",""],["flask-conical",""],["sparkles",""],["folder-open","rust"],
+      ["lightbulb","olive"],["file-text",""],["table-2","rust"],["bar-chart-3","blue"],
+      ["file-archive","rust"],["shield-check","olive"],["alert-triangle","rust"],
+      ["check-circle-2","olive"],["download",""],["refresh-cw",""],["loader-2",""],["external-link","blue"]
+    ];
+    const grid = document.getElementById("grid");
+    for (const [name,tone] of icons){
+      const cell = document.createElement("div");
+      cell.className = "cell" + (tone && tone!=="brand" ? " "+tone : "");
+      cell.innerHTML = `<i data-lucide="${name}" style="width:26px;height:26px"></i><span>${name}</span>`;
+      grid.appendChild(cell);
+    }
+    lucide.createIcons();
+  </script>
+</body>
+</html>
