@@ -21,12 +21,14 @@
 
 import { NextResponse } from "next/server";
 import { startProtocolPipeline } from "@/lib/server/pipeline";
+import { assertSameOrigin } from "@/lib/server/request-origin";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 export async function POST(request: Request) {
   try {
+    assertSameOrigin(request);
     const body = await request.json();
     if (typeof body.slug !== "string" || !body.slug.trim()) {
       return NextResponse.json({ error: "missing_slug" }, { status: 400 });

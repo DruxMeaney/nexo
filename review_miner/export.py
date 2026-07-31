@@ -4,8 +4,9 @@ Column naming follows the new generic convention: every Variable-A field
 is prefixed ``entity_a_``, every Variable-B field is prefixed ``entity_b_``.
 The systematic-review table additionally exposes human-friendly Spanish
 headers driven by the protocol's display labels — for example, a protocol
-with Variable A = "Contaminantes" produces a column ``"Contaminantes detectados"``
-where the legacy pipeline used to hard-code ``"Contaminante detectado"``.
+with Variable A = "Contaminantes" produces a column ``"Variable A: Contaminantes"``
+where the legacy pipeline used to hard-code ``"Contaminante detectado"``. The
+header carries no adjective, so it stays grammatical for any display name.
 """
 
 from __future__ import annotations
@@ -148,18 +149,29 @@ def systematic_table_rows(
 ) -> list[dict[str, object]]:
     """Long table with one row per (article, A-entity, B-entity) combination.
 
-    Spanish column headers are built from the protocol's display names so a
-    bilingual protocol named "Fármacos / Efectos adversos" yields columns
-    like ``"Farmacos detectados"`` and ``"Efectos adversos asociados"`` out
-    of the box.
+    Spanish column headers are built from the protocol's display names with a
+    slot prefix, so a protocol named "Fármacos / Efectos adversos" yields
+    ``"Variable A: Fármacos"`` and ``"Variable B: Efectos adversos"``. The
+    prefix carries the grammar the display name cannot (no gender or number
+    agreement is needed) and keeps both columns distinct even when a protocol
+    gives its two variables the same name.
+
+    Rows for a pair that no :class:`Relation` backs are still emitted — the
+    table is a cross product by design — but they carry no evidence text and
+    no confidence level, because the only evidence available there is the
+    A entity's own snippet, which says nothing about the pair.
     """
 
     name_a = protocol.variable_a.display_name
     name_b = protocol.variable_b.display_name
-    col_a_detected = f"{name_a} detectad{_o_a(name_a)}"
-    col_a_category = f"Categoria de {name_a.lower()}"
-    col_b_associated = f"{name_b} asociad{_o_a(name_b)}"
-    col_relation = f"Asociacion {name_a.lower()}-{name_b.lower()}"
+    # The row dicts are literals: two identical keys would silently collapse
+    # into one column, so the headers are de-duplicated before use.
+    col_a_detected, col_a_category, col_b_associated, col_relation = _unique_columns(
+        f"Variable A: {name_a}",
+        f"Categoria de {name_a.lower()}",
+        f"Variable B: {name_b}",
+        f"Asociacion {name_a.lower()}-{name_b.lower()}",
+    )
 
     relation_lookup = {(r.article_id, r.entity_a_id, r.entity_b_id): r for r in relations}
     b_by_article: dict[str, list[EntitySummary]] = {}
@@ -207,8 +219,8 @@ def systematic_table_rows(
                     col_b_associated: summary_b.label_es or summary_b.label_en,
                     "Tipo de estudio": article.article_kind if article else "",
                     "Modelo experimental": summary_a.study_context,
-                    "Evidencia textual": relation.evidence_text if relation else summary_a.evidence_text,
-                    "Nivel de confianza": relation.confidence if relation else "Baja",
+                    "Evidencia textual": relation.evidence_text if relation else "",
+                    "Nivel de confianza": relation.confidence if relation else "",
                     col_relation: relation.association if relation else "sin_evidencia_suficiente",
                     "Seccion de evidencia": relation.section if relation else "",
                     "Extraccion o inferencia": relation.extraction_or_inference
@@ -219,18 +231,22 @@ def systematic_table_rows(
     return rows
 
 
-def _o_a(word: str) -> str:
-    """Crude Spanish gender suffix: ``"o"`` unless the word ends in ``"a"``/"e"``.
+def _unique_columns(*names: str) -> list[str]:
+    """Return the given headers with any duplicate disambiguated.
 
-    Used only for the systematic-review column headers (Contaminantes
-    detectados, Enfermedades detectadas...). It's a heuristic; the protocol
-    author can override columns by post-processing if exact wording matters.
+    Column headers come from user-supplied display names, so two of them can
+    coincide. Because the rows are dict literals, a repeated key would drop a
+    whole column without warning; a numeric suffix keeps every column present
+    and the result stays deterministic for a given protocol.
     """
 
-    word = word.strip().lower()
-    if word.endswith("a") or word.endswith("e"):
-        return "a"
-    return "o"
+    seen: dict[str, int] = {}
+    unique: list[str] = []
+    for name in names:
+        occurrence = seen.get(name, 0) + 1
+        seen[name] = occurrence
+        unique.append(name if occurrence == 1 else f"{name} ({occurrence})")
+    return unique
 
 
 # --------------------------------------------------------------------------- #

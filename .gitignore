@@ -22,4 +22,12 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
-.vercel
+env/
+.pytest_cache/
+*.egg-info/
+
+# Local run artifacts and logs (never part of the tool's source).
+.vercel/
+*.log
+npm-debug.log*
+yarn-error.log*

@@ -7,26 +7,32 @@ import type {
   ResultsSummary,
   TablePreview
 } from "@/lib/types";
-import { assertProjectFile, DEFAULT_OUTPUT_DIR, resolveUserPath, toDisplayPath } from "./project";
+import { assertReadablePath, DEFAULT_OUTPUT_DIR, resolveUserPath, toDisplayPath } from "./project";
 
 const FIGURE_EXTENSIONS = new Set([".svg", ".png", ".jpg", ".jpeg", ".webp"]);
 const TABLE_EXTENSIONS = new Set([".csv", ".xlsx", ".xls"]);
 
+/**
+ * Descriptions of the files the pipeline writes.
+ *
+ * `{a}` and `{b}` are replaced with the display names of the protocol's two
+ * variables (read from `review_miner_results.json`), so the captions describe
+ * whatever pair the protocol declares instead of the old hardcoded
+ * contaminant/disease domain. Outputs without a protocol block fall back to the
+ * neutral "variable A" / "variable B" labels.
+ */
 const DESCRIPTIONS: Record<string, string> = {
   articles: "Corpus procesado, metadatos extraidos y estado de extraccion de texto.",
-  mentions: "Menciones auditables de contaminantes y enfermedades con seccion, frase y contexto.",
+  mentions: "Menciones auditables de {a} y {b} con seccion, frase y contexto.",
   entity_summaries: "Resumen por articulo y entidad, con rol, confianza y evidencia textual.",
-  relations: "Relaciones contaminante-enfermedad sustentadas por proximidad textual.",
+  relations: "Relaciones {a}-{b} sustentadas por proximidad textual.",
   systematic_review_table: "Tabla consolidada para revision sistematica y auditoria manual.",
-  frecuencia_contaminantes: "Frecuencia de contaminantes detectados como exposicion o variable analitica.",
-  frecuencia_enfermedades: "Frecuencia de enfermedades neurodegenerativas detectadas en el corpus.",
-  heatmap_asociaciones: "Matriz de categorias de contaminantes frente a categorias de enfermedades.",
+  heatmap_asociaciones: "Matriz de categorias de {a} frente a categorias de {b}.",
   tipo_estudio: "Distribucion del corpus por tipo de estudio inferido.",
   nivel_asociacion: "Conteo de relaciones por nivel de asociacion textual.",
-  association_network: "Red exploratoria de pares contaminante-enfermedad reportados.",
-  bubble_contaminant_disease: "Burbujas de pares contaminante-enfermedad por frecuencia y peso.",
+  association_network: "Red exploratoria de pares {a}-{b} reportados.",
   top_association_pairs: "Pares de asociacion mas frecuentes con evidencia cercana.",
-  category_association_heatmap: "Heatmap avanzado por categorias de contaminante y enfermedad.",
+  category_association_heatmap: "Heatmap avanzado por categorias de {a} y {b}.",
   association_by_section: "Relaciones distribuidas por seccion del articulo.",
   cluster_sizes: "Tamanos de clusters del analisis exploratorio K-Means.",
   kmeans_cluster_map: "Mapa K-Means para triage exploratorio de articulos.",
@@ -35,9 +41,60 @@ const DESCRIPTIONS: Record<string, string> = {
   reporte_revision_nexo: "Reporte Word con resumen ejecutivo, metodo y referencias a figuras."
 };
 
-function fileDescription(filePath: string) {
+const FALLBACK_DESCRIPTION = "Archivo generado por el pipeline de mineria y visualizacion.";
+const FREQUENCY_DESCRIPTION = "Frecuencia de deteccion de {v} en el corpus.";
+const BUBBLE_DESCRIPTION = "Burbujas de pares {a}-{b} por frecuencia y peso.";
+
+const DEFAULT_VARIABLE_A = "variable A";
+const DEFAULT_VARIABLE_B = "variable B";
+
+type VariableNames = { a: string; b: string };
+
+/**
+ * Same slug rule the Python side uses for figure filenames
+ * (`review_miner/visualize.py::_slug`): NFD, drop accents, non-alphanumeric
+ * runs to "_", lowercase.
+ */
+function slugifyVariable(value: string) {
+  const cleaned = value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .toLowerCase();
+  return cleaned || "variable";
+}
+
+function variableNames(protocol?: ResultsProtocolInfo): VariableNames {
+  return {
+    a: protocol?.variableA?.trim() || DEFAULT_VARIABLE_A,
+    b: protocol?.variableB?.trim() || DEFAULT_VARIABLE_B
+  };
+}
+
+function fileDescription(filePath: string, names: VariableNames) {
   const stem = path.basename(filePath, path.extname(filePath));
-  return DESCRIPTIONS[stem] || "Archivo generado por el pipeline de mineria y visualizacion.";
+  const template = DESCRIPTIONS[stem] || dynamicDescription(stem, names);
+  return template.split("{a}").join(names.a).split("{b}").join(names.b);
+}
+
+/**
+ * Figure names that embed the variable slugs: `frecuencia_<slug>.svg` (one per
+ * variable) and `bubble_<slug_a>_<slug_b>.svg`. When both display names slugify
+ * to the same value the Python side prefixes them with `a_` / `b_`.
+ */
+function dynamicDescription(stem: string, names: VariableNames) {
+  let slugA = slugifyVariable(names.a);
+  let slugB = slugifyVariable(names.b);
+  if (slugA === slugB) {
+    slugA = `a_${slugA}`;
+    slugB = `b_${slugB}`;
+  }
+  if (stem === `frecuencia_${slugA}`) return FREQUENCY_DESCRIPTION.split("{v}").join("{a}");
+  if (stem === `frecuencia_${slugB}`) return FREQUENCY_DESCRIPTION.split("{v}").join("{b}");
+  if (stem.startsWith("frecuencia_")) return FREQUENCY_DESCRIPTION.split("{v}").join("la variable");
+  if (stem.startsWith("bubble_")) return BUBBLE_DESCRIPTION;
+  return FALLBACK_DESCRIPTION;
 }
 
 async function walkFiles(root: string): Promise<string[]> {
@@ -57,7 +114,7 @@ async function walkFiles(root: string): Promise<string[]> {
   return files.flat();
 }
 
-async function toResultFile(root: string, filePath: string): Promise<ResultFile> {
+async function toResultFile(root: string, filePath: string, names: VariableNames): Promise<ResultFile> {
   const stat = await fs.stat(filePath);
   const ext = path.extname(filePath).toLowerCase();
   let kind: ResultFile["kind"] = "other";
@@ -72,7 +129,7 @@ async function toResultFile(root: string, filePath: string): Promise<ResultFile>
     relativePath: path.relative(root, filePath),
     size: stat.size,
     kind,
-    description: fileDescription(filePath)
+    description: fileDescription(filePath, names)
   };
 }
 
@@ -104,9 +161,11 @@ async function countExtractableArticles(filePath: string) {
 
 export async function summarizeResults(outputDir?: string | null): Promise<ResultsSummary> {
   const root = resolveUserPath(outputDir, DEFAULT_OUTPUT_DIR);
-  assertProjectFile(root);
+  assertReadablePath(root);
+  const protocolInfo = await readProtocolInfo(root);
+  const names = variableNames(protocolInfo);
   const files = await walkFiles(root);
-  const resultFiles = await Promise.all(files.map((file) => toResultFile(root, file)));
+  const resultFiles = await Promise.all(files.map((file) => toResultFile(root, file, names)));
   const figures = resultFiles.filter((file) => file.kind === "figure").sort((a, b) => a.relativePath.localeCompare(b.relativePath));
   const tables = resultFiles.filter((file) => file.kind === "table").sort((a, b) => a.relativePath.localeCompare(b.relativePath));
   const reports = resultFiles.filter((file) => file.kind === "report").sort((a, b) => a.relativePath.localeCompare(b.relativePath));
@@ -117,7 +176,6 @@ export async function summarizeResults(outputDir?: string | null): Promise<Resul
   const mentionsCsv = path.join(root, "mentions.csv");
   const relationsCsv = path.join(root, "relations.csv");
   const stats = await fs.stat(root).catch(() => null);
-  const protocolInfo = await readProtocolInfo(root);
 
   return {
     outputDir: root,
@@ -164,7 +222,7 @@ async function readProtocolInfo(root: string): Promise<ResultsProtocolInfo | und
 
 export async function previewTable(filePath: string): Promise<TablePreview> {
   const resolved = resolveUserPath(filePath, filePath);
-  assertProjectFile(resolved);
+  assertReadablePath(resolved);
   if (path.extname(resolved).toLowerCase() !== ".csv") {
     return { file: toDisplayPath(resolved), headers: [], rows: [] };
   }

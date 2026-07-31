@@ -1,19 +1,18 @@
-import fs from "node:fs/promises";
+/**
+ * POST /api/protocol/load  —  retirada (alias: /api/protocols/load).
+ *
+ * Leia cualquier ruta absoluta del disco y devolvia su JSON, sin contencion al
+ * proyecto, para un formato de protocolo plano que el pipeline ya no ejecuta.
+ * La ruta soportada es /api/protocol/load-folder.
+ */
+
 import { NextResponse } from "next/server";
-import { DEFAULT_PROTOCOLS_DIR, resolveUserPath } from "@/lib/server/project";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(request: Request) {
-  try {
-    const body = (await request.json()) as { path?: string };
-    const filePath = resolveUserPath(body.path, DEFAULT_PROTOCOLS_DIR);
-    const payload = JSON.parse(await fs.readFile(filePath, "utf8"));
-    return NextResponse.json({ path: filePath, payload });
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "No se pudo cargar el protocolo." },
-      { status: 400 }
-    );
-  }
+const RETIRED_MESSAGE =
+  "Esta ruta fue reemplazada por POST /api/protocol/load-folder, que carga un protocolo por slug desde config/protocols/.";
+
+export async function POST() {
+  return NextResponse.json({ error: RETIRED_MESSAGE }, { status: 410 });
 }

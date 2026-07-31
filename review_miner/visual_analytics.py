@@ -13,6 +13,7 @@ display names flow into every figure.
 from __future__ import annotations
 
 import argparse
+import colorsys
 import html
 import json
 import math
@@ -51,7 +52,55 @@ ROLE_WEIGHT = {
     "role_unclear": 0.5,
 }
 
-PALETTE = ["#176B87", "#C2410C", "#4D7C0F", "#7C3AED", "#B45309", "#0F766E", "#BE123C", "#334155", "#A16207"]
+# 12 colores explicitos: el asistente permite kmeansK hasta 12 (ANALYSIS_BOUNDS
+# en src/lib/protocol/defaults.ts). Mas alla de esa cota _cluster_color genera
+# tonos adicionales de forma deterministica.
+PALETTE = [
+    "#176B87",
+    "#C2410C",
+    "#4D7C0F",
+    "#7C3AED",
+    "#B45309",
+    "#0F766E",
+    "#BE123C",
+    "#334155",
+    "#A16207",
+    "#1D4ED8",
+    "#DB2777",
+    "#15803D",
+]
+
+# Etiqueta usada cuando una entidad no tiene categoria ni etiqueta utilizable.
+NO_CATEGORY_LABEL = "(sin categoria)"
+
+# Cortes de color de la matriz de burbujas sobre avg_strength (escala 1-9).
+BUBBLE_COLOR_THRESHOLDS = (7.0, 4.0)
+
+# Columnas minimas que deben existir tras leer cada CSV del pipeline. Un corpus
+# sin relaciones deja ficheros sin cabecera, y estas listas los reconstruyen.
+ARTICLE_COLUMNS = ["article_id", "title", "year", "doi", "article_kind", "text_extractable"]
+SUMMARY_COLUMNS = [
+    "article_id",
+    "entity_type",
+    "entity_id",
+    "label_es",
+    "label_en",
+    "category",
+    "n_mentions",
+    "role",
+    "confidence",
+]
+RELATION_COLUMNS = [
+    "article_id",
+    "entity_a_label",
+    "entity_a_category",
+    "entity_b_label",
+    "entity_b_category",
+    "association",
+    "confidence",
+    "section",
+]
+PAIR_METRIC_COLUMNS = ["weighted_score", "n_relations", "avg_strength", "articles"]
 
 # K-Means only uses these compact prefixes. Specific entity labels and pair
 # strings live in the full matrix for inspection but stay out of clustering
@@ -127,8 +176,69 @@ def _svg_multiline(
     return parts
 
 
+def _text(value: object) -> str:
+    """Celda de pandas a texto plano: NaN/NaT/None se vuelven cadena vacia.
+
+    ``bool(float("nan"))`` es ``True``, asi que sin esta normalizacion las
+    cadenas ``a or b`` sobre columnas leidas de CSV nunca caen al segundo
+    termino y ``str(nan)`` produce la etiqueta literal ``"nan"``.
+    """
+    try:
+        blank = value is None or bool(pd.isna(value))
+    except (TypeError, ValueError):
+        blank = False
+    return "" if blank else str(value)
+
+
+def _category_or_label(category: object, label: object) -> str:
+    """Categoria de una entidad con respaldo en su etiqueta.
+
+    Las taxonomias planas declaran todos sus terminos en la raiz, por lo que el
+    protocolo les asigna categoria "" (NaN al pasar por CSV). En ese caso la
+    propia entidad es su categoria y se usa la etiqueta para que los pivotes y
+    los rasgos ``*_category::`` sigan teniendo un eje real.
+    """
+    return _text(category).strip() or _text(label).strip() or NO_CATEGORY_LABEL
+
+
+def _cluster_color(index: object) -> str:
+    """Color estable por cluster.
+
+    Dentro de PALETTE devuelve el color declarado; mas alla genera matices
+    distinguibles rotando el tono con el angulo aureo (deterministico, sin
+    azar) en vez de reutilizar un color ya asignado.
+    """
+    position = max(0, int(index))
+    if position < len(PALETTE):
+        return PALETTE[position]
+    hue = (137.508 * (position - len(PALETTE) + 1)) % 360.0
+    red, green, blue = colorsys.hls_to_rgb(hue / 360.0, 0.40, 0.62)
+    return "#{:02X}{:02X}{:02X}".format(int(red * 255), int(green * 255), int(blue * 255))
+
+
 def _weight_relation(row: pd.Series) -> float:
-    return ASSOCIATION_WEIGHT.get(str(row.get("association")), 0.0) * CONFIDENCE_WEIGHT.get(str(row.get("confidence")), 1.0)
+    """Peso de evidencia de una relacion = fuerza x confianza.
+
+    Escala declarada 0-9: ASSOCIATION_WEIGHT (3/2/1/0) x CONFIDENCE_WEIGHT
+    (3/2/1). Advertencia metodologica: ``relations._relation_confidence``
+    deriva la confianza de la propia asociacion, de modo que el producto no
+    combina dos dimensiones independientes. La escala realizada por nivel de
+    asociacion es ~9 : 3.9 : 1 (fuerte : debil : especulativa) y no el 3 : 2 : 1
+    de ASSOCIATION_WEIGHT. Se conserva el producto para no alterar los
+    resultados ya publicados; toda lectura del peso debe hacerse en la escala
+    0-9 que se documenta aqui y en visual_analytics_summary.json.
+    """
+    return ASSOCIATION_WEIGHT.get(_text(row.get("association")), 0.0) * CONFIDENCE_WEIGHT.get(_text(row.get("confidence")), 1.0)
+
+
+def _with_weight_column(relations: pd.DataFrame) -> pd.DataFrame:
+    """Copia de ``relations`` con ``weighted_score``; tolera cero relaciones."""
+    frame = relations.copy()
+    if frame.empty:
+        frame["weighted_score"] = pd.Series(dtype=float)
+        return frame
+    frame["weighted_score"] = frame.apply(_weight_relation, axis=1)
+    return frame
 
 
 # --------------------------------------------------------------------------- #
@@ -146,41 +256,48 @@ def build_feature_matrix(
     Features are intentionally interpretable: per-entity categories, study
     type, association levels, evidence sections, and protocol-driven pair
     strings. The entity_type values are ``"a"`` and ``"b"`` (the slot IDs).
+
+    Article ids are normalised to text in the three tables, so an all-numeric
+    naming convention (1.pdf, 2.pdf ...) keeps matching across them.
     """
 
+    articles = articles.copy()
+    articles["article_id"] = [_text(value) for value in articles["article_id"]]
     article_ids = list(articles["article_id"])
     rows: dict[str, Counter[str]] = {article_id: Counter() for article_id in article_ids}
 
     for _, row in summaries.iterrows():
-        article_id = str(row["article_id"])
+        article_id = _text(row["article_id"])
         if article_id not in rows:
             continue
-        role_weight = ROLE_WEIGHT.get(str(row.get("role")), 1.0)
+        role_weight = ROLE_WEIGHT.get(_text(row.get("role")), 1.0)
         mention_weight = math.log1p(float(row.get("n_mentions", 0) or 0))
         value = role_weight * mention_weight
-        entity_type = str(row["entity_type"])  # "a" or "b"
-        category = str(row["category"])
-        label = str(row.get("label_es") or row.get("label_en") or "")
+        entity_type = _text(row["entity_type"])  # "a" or "b"
+        label = _text(row.get("label_es")).strip() or _text(row.get("label_en")).strip() or _text(row.get("entity_id")).strip()
+        category = _category_or_label(row.get("category"), label)
         rows[article_id][f"{entity_type}_category::{category}"] += value
         rows[article_id][f"{entity_type}_label::{label}"] += value * 0.65
-        rows[article_id][f"{entity_type}_confidence::{row.get('confidence')}"] += 1.0
+        rows[article_id][f"{entity_type}_confidence::{_text(row.get('confidence'))}"] += 1.0
 
     for _, row in relations.iterrows():
-        article_id = str(row["article_id"])
+        article_id = _text(row["article_id"])
         if article_id not in rows:
             continue
         weight = _weight_relation(row)
         if weight <= 0:
             continue
-        rows[article_id][f"relation_association::{row['association']}"] += weight
-        rows[article_id][f"relation_confidence::{row['confidence']}"] += weight
-        rows[article_id][f"relation_section::{row['section']}"] += weight
-        rows[article_id][f"relation_pair::{row['entity_a_label']} → {row['entity_b_label']}"] += weight * 0.5
-        rows[article_id][f"relation_category_pair::{row['entity_a_category']} → {row['entity_b_category']}"] += weight
+        category_a = _category_or_label(row.get("entity_a_category"), row.get("entity_a_label"))
+        category_b = _category_or_label(row.get("entity_b_category"), row.get("entity_b_label"))
+        rows[article_id][f"relation_association::{_text(row['association'])}"] += weight
+        rows[article_id][f"relation_confidence::{_text(row['confidence'])}"] += weight
+        rows[article_id][f"relation_section::{_text(row['section'])}"] += weight
+        rows[article_id][f"relation_pair::{_text(row['entity_a_label'])} → {_text(row['entity_b_label'])}"] += weight * 0.5
+        rows[article_id][f"relation_category_pair::{category_a} → {category_b}"] += weight
 
     for _, row in articles.iterrows():
-        article_id = str(row["article_id"])
-        rows[article_id][f"article_kind::{row['article_kind']}"] += 2.0
+        article_id = _text(row["article_id"])
+        rows[article_id][f"article_kind::{_text(row['article_kind'])}"] += 2.0
 
     feature_names = sorted({feature for counter in rows.values() for feature in counter})
     matrix = pd.DataFrame(
@@ -193,6 +310,8 @@ def build_feature_matrix(
 
 
 def standardize_matrix(matrix: pd.DataFrame) -> tuple[np.ndarray, list[str]]:
+    if matrix.empty:
+        return np.zeros((len(matrix), 1)), []
     values = matrix.to_numpy(dtype=float)
     std = values.std(axis=0)
     keep = std > 1e-12
@@ -254,9 +373,35 @@ def _scale(values: np.ndarray, low: float, high: float) -> np.ndarray:
 # --------------------------------------------------------------------------- #
 
 
+def _write_placeholder_svg(output_path: Path, title: str, message: str) -> None:
+    """Figura vacia pero valida: titulo y motivo declarados.
+
+    Se usa cuando no hay datos que dibujar, para que el conjunto de figuras
+    quede completo y el lector vea por que el panel esta vacio.
+    """
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    width, height = 1200, 260
+    parts = [
+        f"<svg xmlns='http://www.w3.org/2000/svg' width='{width}' height='{height}' viewBox='0 0 {width} {height}'>",
+        f"<rect x='0' y='0' width='{width}' height='{height}' fill='white'/>",
+        f"<text x='32' y='58' font-family='Arial, sans-serif' font-size='28' font-weight='700' fill='#111827'>{_safe(title)}</text>",
+        f"<text x='32' y='104' font-family='Arial, sans-serif' font-size='17' fill='#374151'>{_safe(message)}</text>",
+        "</svg>",
+    ]
+    output_path.write_text("\n".join(parts), encoding="utf-8")
+
+
 def svg_kmeans_cluster_map(cluster_df: pd.DataFrame, output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     width, height = 1900, 1120
+    if cluster_df.empty:
+        _write_placeholder_svg(
+            output_path,
+            "K-Means de articulos (sin PCA)",
+            "Sin articulos que agrupar: el corpus no produjo filas para la matriz articulo × rasgo.",
+        )
+        return
     left, right, top, bottom = 120, 260, 125, 120
     clusters = sorted(cluster_df["cluster"].unique())
     cluster_x = {
@@ -264,7 +409,7 @@ def svg_kmeans_cluster_map(cluster_df: pd.DataFrame, output_path: Path) -> None:
         for idx, cluster in enumerate(clusters)
     }
     ys = _scale(cluster_df["distance_to_centroid"].to_numpy(float), height - bottom, top + 20)
-    max_rel = max(1, int(cluster_df["n_relations_weighted"].max()))
+    max_rel = max(1, int(cluster_df["n_relations_weighted"].fillna(0).max()))
     parts = [
         f"<svg xmlns='http://www.w3.org/2000/svg' width='{width}' height='{height}' viewBox='0 0 {width} {height}'>",
         f"<rect x='0' y='0' width='{width}' height='{height}' fill='white'/>",
@@ -293,7 +438,7 @@ def svg_kmeans_cluster_map(cluster_df: pd.DataFrame, output_path: Path) -> None:
         label_pieces.append(members.sort_values("distance_to_centroid", ascending=False).head(1))
     label_ids = set(pd.concat(label_pieces)["article_id"])
     for idx, (_, row) in enumerate(cluster_df.iterrows()):
-        color = PALETTE[int(row["cluster"]) % len(PALETTE)]
+        color = _cluster_color(row["cluster"])
         radius = 6 + 13 * math.sqrt(max(0, float(row["n_relations_weighted"])) / max_rel)
         jitter_seed = sum(ord(char) for char in str(row["article_id"]))
         jitter = ((jitter_seed % 31) - 15) * 1.9
@@ -312,7 +457,7 @@ def svg_kmeans_cluster_map(cluster_df: pd.DataFrame, output_path: Path) -> None:
     parts.append(f"<text x='{legend_x}' y='130' font-family='Arial, sans-serif' font-size='18' font-weight='700' fill='#111827'>Clusters</text>")
     for cluster in clusters:
         y = 160 + int(cluster) * 34
-        color = PALETTE[int(cluster) % len(PALETTE)]
+        color = _cluster_color(cluster)
         count = int((cluster_df["cluster"] == cluster).sum())
         parts.append(f"<rect x='{legend_x}' y='{y-13}' width='18' height='18' fill='{color}'/>")
         parts.append(f"<text x='{legend_x+28}' y='{y+2}' font-family='Arial, sans-serif' font-size='15' fill='#374151'>Cluster {int(cluster)} ({count})</text>")
@@ -351,7 +496,7 @@ def svg_bubble_matrix(
 ) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     if pair_df.empty:
-        output_path.write_text("<svg xmlns='http://www.w3.org/2000/svg'></svg>", encoding="utf-8")
+        _write_placeholder_svg(output_path, title, "Sin pares con evidencia suficiente en este corpus.")
         return
     top_a = (
         pair_df.groupby("entity_a_label")["weighted_score"].sum().sort_values(ascending=False).head(max_entities_a).index.tolist()
@@ -363,11 +508,13 @@ def svg_bubble_matrix(
     width = left + len(cols_b) * cell + 360
     height = top + len(top_a) * cell + 90
     max_value = max(1.0, float(data["weighted_score"].max()))
+    strong_cut, weak_cut = BUBBLE_COLOR_THRESHOLDS
     parts = [
         f"<svg xmlns='http://www.w3.org/2000/svg' width='{width}' height='{height}' viewBox='0 0 {width} {height}'>",
         f"<rect x='0' y='0' width='{width}' height='{height}' fill='white'/>",
         f"<text x='32' y='44' font-family='Arial, sans-serif' font-size='30' font-weight='700' fill='#111827'>{_safe(title)}</text>",
-        "<text x='32' y='76' font-family='Arial, sans-serif' font-size='16' fill='#374151'>Tamaño = evidencia ponderada por fuerza/confianza; color = asociación promedio.</text>",
+        "<text x='32' y='76' font-family='Arial, sans-serif' font-size='16' fill='#374151'>Tamaño = evidencia ponderada acumulada (suma de fuerza × confianza); color = peso promedio por relación (escala 1-9).</text>",
+        f"<text x='32' y='102' font-family='Arial, sans-serif' font-size='14' fill='#64748B'>Color: azul ≥ {strong_cut:.0f}, ámbar ≥ {weak_cut:.0f}, gris &lt; {weak_cut:.0f} sobre ese peso promedio; no es la escala 1-3 de fuerza de asociación.</text>",
     ]
     for j, label_b in enumerate(cols_b):
         x = left + j * cell + cell / 2
@@ -389,8 +536,12 @@ def svg_bubble_matrix(
             value = float(row["weighted_score"])
             radius = 7 + 29 * math.sqrt(value / max_value)
             avg = float(row["avg_strength"])
-            color = "#176B87" if avg >= 7 else "#D97706" if avg >= 4 else "#64748B"
-            tooltip = _safe(f"{label_a} → {label_b}: peso={value:.1f}, n={int(row['n_relations'])}, fuerza promedio={avg:.1f}", 220)
+            color = "#176B87" if avg >= strong_cut else "#D97706" if avg >= weak_cut else "#64748B"
+            tooltip = _safe(
+                f"{label_a} → {label_b}: peso={value:.1f}, n={int(row['n_relations'])}, "
+                f"peso promedio (asociación × confianza, escala 1-9)={avg:.1f}",
+                220,
+            )
             parts.append(f"<circle cx='{x+cell/2:.1f}' cy='{y+cell/2:.1f}' r='{radius:.1f}' fill='{color}' fill-opacity='0.75'><title>{tooltip}</title></circle>")
     parts.append("</svg>")
     output_path.write_text("\n".join(parts), encoding="utf-8")
@@ -399,7 +550,7 @@ def svg_bubble_matrix(
 def svg_heatmap(title: str, matrix: pd.DataFrame, output_path: Path) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     if matrix.empty:
-        output_path.write_text("<svg xmlns='http://www.w3.org/2000/svg'></svg>", encoding="utf-8")
+        _write_placeholder_svg(output_path, title, "Sin relaciones con evidencia suficiente para construir la tabla cruzada.")
         return
     rows = list(matrix.index)
     cols = list(matrix.columns)
@@ -447,7 +598,11 @@ def svg_bipartite_network(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     edges = edges.sort_values("weighted_score", ascending=False).head(max_edges).copy()
     if edges.empty:
-        output_path.write_text("<svg xmlns='http://www.w3.org/2000/svg'></svg>", encoding="utf-8")
+        _write_placeholder_svg(
+            output_path,
+            "Red bipartita de asociaciones",
+            "Sin aristas: ninguna relacion alcanzo evidencia textual suficiente.",
+        )
         return
     labels_a = edges.groupby("entity_a_label")["weighted_score"].sum().sort_values(ascending=False).index.tolist()
     labels_b = edges.groupby("entity_b_label")["weighted_score"].sum().sort_values(ascending=False).index.tolist()
@@ -462,7 +617,7 @@ def svg_bipartite_network(
         f"<svg xmlns='http://www.w3.org/2000/svg' width='{width}' height='{height}' viewBox='0 0 {width} {height}'>",
         f"<rect x='0' y='0' width='{width}' height='{height}' fill='white'/>",
         "<text x='32' y='44' font-family='Arial, sans-serif' font-size='30' font-weight='700' fill='#111827'>Red bipartita de asociaciones</text>",
-        "<text x='32' y='76' font-family='Arial, sans-serif' font-size='16' fill='#374151'>Solo relaciones con evidencia textual cercana; grosor = peso por fuerza/confianza.</text>",
+        "<text x='32' y='76' font-family='Arial, sans-serif' font-size='16' fill='#374151'>Solo relaciones con evidencia textual cercana; grosor = peso (fuerza × confianza, escala 0-9).</text>",
         f"<text x='230' y='118' font-family='Arial, sans-serif' font-size='20' font-weight='700'>{_safe(name_a)}</text>",
         f"<text x='1680' y='118' font-family='Arial, sans-serif' font-size='20' font-weight='700'>{_safe(name_b)}</text>",
     ]
@@ -489,10 +644,22 @@ def svg_bipartite_network(
 
 
 def build_pair_tables(relations: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    valid = relations[relations["association"] != "sin_evidencia_suficiente"].copy()
+    """Tablas de pares por tipo de asociacion y colapsadas.
+
+    ``avg_strength`` es el peso promedio por relacion (asociacion x confianza,
+    escala 1-9), no la fuerza de asociacion en la escala 1-3.
+    """
+
+    if "association" not in relations.columns:
+        valid = relations.iloc[0:0].copy()
+    else:
+        valid = relations[relations["association"] != "sin_evidencia_suficiente"].copy()
     if valid.empty:
-        empty = pd.DataFrame()
-        return empty, empty
+        # Marcos vacios pero con cabecera: un corpus sin relaciones debe exportar
+        # CSVs legibles por la siguiente etapa, no ficheros sin columnas.
+        by_type = pd.DataFrame(columns=["entity_a_label", "entity_b_label", "association", *PAIR_METRIC_COLUMNS])
+        collapsed = pd.DataFrame(columns=["entity_a_label", "entity_b_label", *PAIR_METRIC_COLUMNS])
+        return by_type, collapsed
     valid["weighted_score"] = valid.apply(_weight_relation, axis=1)
     pair = (
         valid.groupby(["entity_a_label", "entity_b_label", "association"], as_index=False)
@@ -531,21 +698,42 @@ def cluster_profiles(matrix: pd.DataFrame, cluster_df: pd.DataFrame, top_n: int 
                 "top_features": " | ".join(top_features),
             }
         )
-    return pd.DataFrame(rows)
+    # Con cabecera aunque no haya clusters: el CSV debe seguir siendo legible.
+    return pd.DataFrame(rows, columns=["cluster", "n_articles", "article_ids", "top_features"])
 
 
-def cluster_centroids_table(centers: np.ndarray, kept_columns: list[str], k: int) -> pd.DataFrame:
+def cluster_centroids_table(
+    centers: np.ndarray,
+    kept_columns: list[str],
+    k: int,
+    member_counts: dict[int, int] | None = None,
+) -> pd.DataFrame:
+    """Centroides por cluster en unidades z.
+
+    kmeans_numpy solo recalcula un centroide cuando el cluster conserva
+    miembros, asi que un cluster vacio mantiene la semilla inicial y no
+    representa a ningun articulo. Cuando se pasa ``member_counts`` esos
+    clusters se descartan y se anota ``n_articles``.
+    """
+
+    # Cabecera minima para que el CSV siga siendo legible sin clusters reales.
+    header = ["cluster"] if member_counts is None else ["cluster", "n_articles"]
     if centers.size == 0 or not kept_columns:
-        return pd.DataFrame()
+        return pd.DataFrame(columns=header)
     rows = []
     for cluster in range(min(k, len(centers))):
+        n_articles = None if member_counts is None else int(member_counts.get(cluster, 0))
+        if n_articles == 0:
+            continue
         values = pd.Series(centers[cluster], index=kept_columns).sort_values(ascending=False)
-        row = {"cluster": cluster}
+        row: dict[str, object] = {"cluster": cluster}
+        if n_articles is not None:
+            row["n_articles"] = n_articles
         for rank, (feature, value) in enumerate(values.head(20).items(), start=1):
             row[f"feature_{rank}"] = feature
             row[f"zscore_{rank}"] = float(value)
         rows.append(row)
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows) if rows else pd.DataFrame(columns=header)
 
 
 # --------------------------------------------------------------------------- #
@@ -558,6 +746,66 @@ def _slug(value: str) -> str:
     cleaned = "".join(ch for ch in cleaned if unicodedata.category(ch) != "Mn")
     cleaned = re.sub(r"[^a-zA-Z0-9]+", "_", cleaned).strip("_").lower()
     return cleaned or "variable"
+
+
+def _read_table(path: Path, columns: list[str]) -> pd.DataFrame:
+    """Lee un CSV del pipeline tolerando el caso vacio.
+
+    Un corpus sin relaciones (o sin menciones) deja un CSV de un solo salto de
+    linea, sin cabecera, que ``read_csv`` rechaza con EmptyDataError. Aqui se
+    devuelve un marco vacio con las columnas esperadas para que la etapa
+    completa degrade a figuras y tablas vacias pero validas.
+    """
+
+    if not path.exists():
+        # Un archivo ausente no es un corpus vacio: es una carpeta equivocada.
+        # Fallar aqui evita producir figuras "exitosas" sin datos detras.
+        raise FileNotFoundError(
+            f"No se encontro {path.name} en {path.parent}. "
+            "Indica la carpeta de salida de una corrida del pipeline."
+        )
+    try:
+        frame = pd.read_csv(path, dtype={"article_id": str})
+    except pd.errors.EmptyDataError:
+        # Un CSV sin cabecera si es el caso legitimo de "cero filas": el
+        # pipeline lo escribe cuando no hubo menciones o relaciones.
+        frame = pd.DataFrame(columns=columns)
+    else:
+        # El archivo tenia cabecera: entonces su esquema debe ser el vigente.
+        # Rellenar columnas ausentes convertiria un CSV de una version anterior
+        # en resultados silenciosamente vacios o inventados.
+        missing = [column for column in columns if column not in frame.columns]
+        if missing:
+            raise KeyError(
+                f"{path.name} no tiene las columnas {missing}. "
+                f"Columnas presentes: {list(frame.columns)}. "
+                "Vuelve a ejecutar el pipeline para regenerar esta carpeta."
+            )
+    for column in columns:
+        if column not in frame.columns:
+            frame[column] = pd.Series(dtype="object")
+    if "article_id" in frame.columns:
+        frame["article_id"] = [_text(value) for value in frame["article_id"]]
+    return frame
+
+
+def _normalize_pivot_keys(relations: pd.DataFrame) -> pd.DataFrame:
+    """Deja sin huecos las columnas que sirven de eje en los pivotes.
+
+    En una taxonomia plana todos los terminos viven en la raiz y el protocolo
+    les asigna categoria "" (NaN tras el CSV); sin este relleno ``pivot_table``
+    descarta esas filas y la figura sale en blanco. La seccion recibe el mismo
+    trato para que ninguna relacion desaparezca del mapa de calor.
+    """
+
+    frame = relations.copy()
+    for slot in ("a", "b"):
+        frame[f"entity_{slot}_category"] = [
+            _category_or_label(category, label)
+            for category, label in zip(frame[f"entity_{slot}_category"], frame[f"entity_{slot}_label"])
+        ]
+    frame["section"] = [_text(section).strip() or "(sin seccion)" for section in frame["section"]]
+    return frame
 
 
 def run_visual_analytics(
@@ -578,17 +826,17 @@ def run_visual_analytics(
     slug_a = _slug(name_a)
     slug_b = _slug(name_b)
 
-    articles = pd.read_csv(input_dir / "articles.csv")
-    summaries = pd.read_csv(input_dir / "entity_summaries.csv")
-    relations = pd.read_csv(input_dir / "relations.csv")
+    articles = _read_table(input_dir / "articles.csv", ARTICLE_COLUMNS)
+    summaries = _read_table(input_dir / "entity_summaries.csv", SUMMARY_COLUMNS)
+    relations = _normalize_pivot_keys(_read_table(input_dir / "relations.csv", RELATION_COLUMNS))
 
     raw_matrix, metadata = build_feature_matrix(articles, summaries, relations)
     matrix = np.log1p(raw_matrix)
     kmeans_matrix = select_kmeans_features(matrix)
     kmeans_values, kept_columns = standardize_matrix(kmeans_matrix)
     labels, centers, distances, inertia = kmeans_numpy(kmeans_values, k=kmeans_k)
-    weighted_relations = relations.copy()
-    weighted_relations["weighted_score"] = weighted_relations.apply(_weight_relation, axis=1)
+    cluster_sizes = Counter(int(label) for label in labels)
+    weighted_relations = _with_weight_column(relations)
     relation_weight_by_article = weighted_relations.groupby("article_id")["weighted_score"].sum()
 
     cluster_df = metadata.reset_index().rename(columns={"index": "article_id"})
@@ -602,7 +850,7 @@ def run_visual_analytics(
 
     profile_df = cluster_profiles(kmeans_matrix, cluster_df)
     profile_df.to_csv(output_dir / "cluster_profiles.csv", index=False)
-    centroid_df = cluster_centroids_table(centers, kept_columns, k=kmeans_k)
+    centroid_df = cluster_centroids_table(centers, kept_columns, k=kmeans_k, member_counts=cluster_sizes)
     centroid_df.to_csv(output_dir / "kmeans_centroids.csv", index=False)
     raw_matrix.to_csv(output_dir / "article_feature_matrix_raw.csv")
     matrix.to_csv(output_dir / "article_feature_matrix_log1p.csv")
@@ -616,19 +864,21 @@ def run_visual_analytics(
     outputs["kmeans_map"] = figures / "kmeans_cluster_map.svg"
     svg_kmeans_cluster_map(cluster_df, outputs["kmeans_map"])
 
-    if not pair_collapsed.empty:
-        outputs["bubble"] = figures / f"bubble_{slug_a}_{slug_b}.svg"
-        svg_bubble_matrix(
-            pair_collapsed,
-            outputs["bubble"],
-            title=f"Matriz de burbujas: {name_a.lower()} × {name_b.lower()}",
-        )
-        outputs["network"] = figures / "association_network.svg"
-        edge_for_network = pair_by_assoc.copy()
-        svg_bipartite_network(edge_for_network, outputs["network"], name_a=name_a, name_b=name_b)
+    # Las figuras se generan siempre: cuando no hay datos escriben una version
+    # vacia pero valida con el motivo, en lugar de faltar del conjunto.
+    outputs["bubble"] = figures / f"bubble_{slug_a}_{slug_b}.svg"
+    svg_bubble_matrix(
+        pair_collapsed,
+        outputs["bubble"],
+        title=f"Matriz de burbujas: {name_a.lower()} × {name_b.lower()}",
+    )
+    outputs["network"] = figures / "association_network.svg"
+    edge_for_network = pair_by_assoc.copy()
+    svg_bipartite_network(edge_for_network, outputs["network"], name_a=name_a, name_b=name_b)
 
+    evidenced = weighted_relations[weighted_relations["association"] != "sin_evidencia_suficiente"]
     section_matrix = pd.pivot_table(
-        weighted_relations[weighted_relations["association"] != "sin_evidencia_suficiente"],
+        evidenced,
         values="weighted_score",
         index="association",
         columns="section",
@@ -639,7 +889,7 @@ def run_visual_analytics(
     svg_heatmap("Asociaciones por seccion", section_matrix, outputs["section_heatmap"])
 
     category_matrix = pd.pivot_table(
-        weighted_relations[weighted_relations["association"] != "sin_evidencia_suficiente"],
+        evidenced,
         values="weighted_score",
         index="entity_a_category",
         columns="entity_b_category",
@@ -651,12 +901,11 @@ def run_visual_analytics(
 
     top_pairs = pair_collapsed.sort_values("weighted_score", ascending=False).head(30) if not pair_collapsed.empty else pd.DataFrame()
     outputs["top_pairs"] = figures / "top_association_pairs.svg"
-    if not top_pairs.empty:
-        svg_bar(
-            f"Pares {name_a.lower()}-{name_b.lower()} con mayor peso",
-            [(f"{row.entity_a_label} → {row.entity_b_label}", float(row.weighted_score)) for _, row in top_pairs.iterrows()],
-            outputs["top_pairs"],
-        )
+    svg_bar(
+        f"Pares {name_a.lower()}-{name_b.lower()} con mayor peso",
+        [(f"{row.entity_a_label} → {row.entity_b_label}", float(row.weighted_score)) for _, row in top_pairs.iterrows()],
+        outputs["top_pairs"],
+    )
 
     profile_items = []
     for _, row in profile_df.iterrows():
@@ -666,8 +915,11 @@ def run_visual_analytics(
 
     report = {
         "k": kmeans_k,
+        "k_requested": int(kmeans_k),
+        "k_effective": int(len([cluster for cluster, size in cluster_sizes.items() if size > 0])),
         "clustering_algorithm": "K-Means on standardized log1p article-feature matrix; PCA is not used.",
         "n_articles": int(len(articles)),
+        "n_relations": int(len(relations)),
         "n_features": int(matrix.shape[1]),
         "n_features_used_for_kmeans": int(len(kept_columns)),
         "kmeans_feature_policy": (
@@ -677,6 +929,30 @@ def run_visual_analytics(
             "exported matrices."
         ),
         "kmeans_inertia": inertia,
+        "relation_weight": {
+            "formula": "ASSOCIATION_WEIGHT[association] * CONFIDENCE_WEIGHT[confidence]",
+            "declared_scale": "0-9",
+            "association_weight": ASSOCIATION_WEIGHT,
+            "confidence_weight": CONFIDENCE_WEIGHT,
+            "note": (
+                "Confidence is derived from association in relations._relation_confidence, "
+                "so the two factors are not independent: the realized mean weight ratio is "
+                "about 9 : 3.9 : 1 for asociacion_fuerte : asociacion_debil : "
+                "mencion_especulativa, not the 3 : 2 : 1 of ASSOCIATION_WEIGHT alone. "
+                "Read every weight (bubble size, edge width, heatmap cell, bar length) on "
+                "the 0-9 product scale."
+            ),
+        },
+        "empty_category_fallback": (
+            f"Relations with an empty category (flat taxonomies place every term at the root) "
+            f"use the entity label as its own category; '{NO_CATEGORY_LABEL}' is used only when "
+            "neither category nor label is available."
+        ),
+        "bubble_color_thresholds": {
+            "metric": "avg_strength = mean weighted_score per relation (association x confidence, scale 1-9)",
+            "blue_min": BUBBLE_COLOR_THRESHOLDS[0],
+            "amber_min": BUBBLE_COLOR_THRESHOLDS[1],
+        },
         "protocol": {
             "name": protocol.identity.name,
             "variable_a": name_a,

@@ -36,9 +36,8 @@ RevisionContaminantes/
 
 ## Requisitos
 
-- Node.js 20 o superior.
-- Python 3.10 o superior.
-- Dependencias Python del pipeline.
+- Node.js 20.9 o superior.
+- Python 3.10 o superior para la instalacion normal; Python 3.12 o superior si usas el entorno bloqueado (`requirements-lock.txt`).
 - `zip` disponible en la maquina local para crear el paquete descargable.
 
 Instala dependencias JavaScript:
@@ -47,16 +46,47 @@ Instala dependencias JavaScript:
 npm install
 ```
 
-Instala dependencias Python:
+Crea el entorno virtual e instala dependencias Python (instalacion normal, rangos flexibles):
 
 ```bash
-python3 -m pip install -r requirements_review_miner.txt
+python3 -m venv .venv
+.venv/bin/python -m pip install --upgrade pip
+.venv/bin/python -m pip install -r requirements_review_miner.txt
+```
+
+El entorno virtual es necesario: en macOS y en muchas distribuciones Linux el Python del sistema esta marcado como *externally managed* y `pip install` falla fuera de un venv.
+
+### Reproduccion exacta
+
+`requirements_review_miner.txt` declara rangos y sirve para uso normal. Para reproducir exactamente los numeros publicados usa el entorno bloqueado:
+
+```bash
+.venv/bin/python -m pip install -r requirements-lock.txt
+```
+
+`requirements-lock.txt` es un `pip freeze` del entorno de trabajo (pandas 3.0.5, numpy 2.5.1, pypdf 6.14.2, openpyxl 3.1.5, python-docx 1.2.0) verificado con CPython 3.14.6.
+
+### Scripts de figuras opcionales
+
+`generar_graficos_menciones.py` y `generar_diagrama_algoritmo_detallado.py` son utilidades auxiliares y son los unicos archivos que necesitan matplotlib. El pipeline principal no lo usa (sus figuras son SVG nativas). Si los vas a correr:
+
+```bash
+.venv/bin/python -m pip install "matplotlib>=3.8,<4"
 ```
 
 ## Ejecucion local
 
+Apunta la app al interprete del entorno virtual y arrancala:
+
 ```bash
+export PYTHON_BIN="$PWD/.venv/bin/python"
 npm run dev
+```
+
+Si no defines `PYTHON_BIN`, la app usa `python3` del sistema, que no ve los paquetes del venv y el pipeline falla al importar pandas. Tambien puedes fijarlo de forma permanente en `.env.local`:
+
+```bash
+PYTHON_BIN=/ruta/absoluta/al/proyecto/.venv/bin/python
 ```
 
 Abre:
@@ -101,7 +131,7 @@ Opcionales:
 PYTHON_BIN=/ruta/a/python3
 ```
 
-Si no se define, la app usa `python3`.
+Si no se define, la app usa `python3`. Cuando instalas las dependencias en `.venv` (lo recomendado), apuntala a `.venv/bin/python`.
 
 ## Vercel
 
@@ -153,3 +183,18 @@ El `.gitignore` evita subir por accidente:
 - Archivos de entorno y dependencias locales.
 
 Antes de publicar un repositorio, revisa manualmente que no haya PDFs, credenciales ni resultados confidenciales.
+
+## Licencia
+
+NEXO se distribuye bajo la licencia MIT. El texto completo esta en [`LICENSE`](LICENSE).
+
+Las dependencias son todas permisivas y compatibles con MIT: Next.js, React, papaparse y docx (MIT), lucide-react (ISC) en JavaScript; pypdf, pandas y numpy (BSD-3-Clause), openpyxl y python-docx (MIT) en Python.
+
+## Como citar
+
+Los metadatos de citacion estan en [`CITATION.cff`](CITATION.cff), legible por GitHub, Zenodo y gestores bibliograficos. Cita la version que usaste:
+
+```text
+Meaney, D. (2026). NEXO: Mineria de datos para revisiones (version 0.1.0) [Software].
+https://github.com/DruxMeaney/nexo
+```

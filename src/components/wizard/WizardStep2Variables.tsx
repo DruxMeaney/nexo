@@ -62,8 +62,8 @@ export function WizardStep2Variables({ t, errors }: Props) {
           t={t}
           title={t.wizard.variables.variableA}
           variable={draft.variableA}
-          placeholderEs="Ej. Contaminantes"
-          placeholderEn="e.g. Contaminants"
+          placeholderEs={t.wizard.variables.fieldDisplayNamePlaceholderAEs}
+          placeholderEn={t.wizard.variables.fieldDisplayNamePlaceholderAEn}
           onChange={(patch) => setVariableMetadata("variableA", patch)}
           slot="A"
           nameInvalid={aInvalid}
@@ -72,8 +72,8 @@ export function WizardStep2Variables({ t, errors }: Props) {
           t={t}
           title={t.wizard.variables.variableB}
           variable={draft.variableB}
-          placeholderEs="Ej. Enfermedades"
-          placeholderEn="e.g. Diseases"
+          placeholderEs={t.wizard.variables.fieldDisplayNamePlaceholderBEs}
+          placeholderEn={t.wizard.variables.fieldDisplayNamePlaceholderBEn}
           onChange={(patch) => setVariableMetadata("variableB", patch)}
           slot="B"
           nameInvalid={bInvalid}

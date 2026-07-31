@@ -1,11 +1,21 @@
-pypdf>=5.0
-pandas>=2.0
-openpyxl>=3.1
-numpy>=1.24
-python-docx>=1.1
+# Dependencias Python del pipeline (instalacion normal).
+# Los rangos llevan limite superior porque el pipeline depende de
+# comportamientos sensibles a la version mayor de pandas/numpy
+# (pivot_table, groupby con dropna, manejo de NaN en la matriz de rasgos).
+# Para reproducir exactamente los numeros publicados usa requirements-lock.txt.
+pypdf>=5.0,<7
+pandas>=2.0,<4
+openpyxl>=3.1,<4
+numpy>=1.24,<3
+python-docx>=1.1,<2
+
+# Opcional: solo lo necesitan los dos scripts de figuras auxiliares
+# generar_graficos_menciones.py y generar_diagrama_algoritmo_detallado.py.
+# El pipeline principal no lo usa (sus figuras son SVG nativas).
+# Instalar con: python3 -m pip install "matplotlib>=3.8,<4"
+# matplotlib>=3.8,<4
 
 # Opcionales para extensiones futuras:
-# matplotlib>=3.8
 # seaborn>=0.13
 # scikit-learn>=1.4
 # sentence-transformers>=3.0

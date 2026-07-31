@@ -79,6 +79,107 @@ ILLEGAL_EXCEL_CHARS = {
     if char not in "\t\n\r"
 }
 
+# Seed for the manual-validation stratified sample. It is a fixed, documented
+# constant (the same value the K-Means run uses in visual_analytics.py) so the
+# sample is drawn at random *and* is byte-identical between runs. It is echoed
+# into publication_pipeline_summary.json with every export.
+DEFAULT_VALIDATION_SEED = 13
+
+# Explicit schemas for the tables that can legitimately come out empty (a
+# corpus where nothing matched, or one with no A-B co-occurrence). Building the
+# DataFrame with `columns=` keeps the header well formed so the export still
+# writes a valid, empty table instead of raising KeyError in sort_values.
+ARTICLE_MATRIX_META_COLUMNS = ["article_id", "title", "year", "doi", "article_kind", "word_count"]
+
+ENTITY_FREQUENCY_COLUMNS = [
+    "entity_type",
+    "entity_id",
+    "label_es",
+    "label_en",
+    "category",
+    "raw_mentions",
+    "articles_with_mentions",
+    "document_frequency",
+    "idf",
+    "mentions_per_10k_words_corpus",
+    "mean_mentions_per_article",
+]
+
+KWIC_COLUMNS = [
+    "article_id",
+    "title",
+    "year",
+    "doi",
+    "entity_type",
+    "entity_id",
+    "label_es",
+    "label_en",
+    "category",
+    "matched_text",
+    "section",
+    "page",
+    "left_context",
+    "keyword",
+    "right_context",
+    "sentence",
+    "cue_exposure",
+    "cue_dose",
+    "cue_association",
+    "cue_speculative",
+    "cue_negation",
+]
+
+VALIDATION_ENTITY_COLUMNS = [
+    "article_id",
+    "title",
+    "entity_type",
+    "label_es",
+    "category",
+    "algorithm_role",
+    "algorithm_confidence",
+    "n_mentions",
+    "sections",
+    "evidence_text",
+    "human_role",
+    "human_confidence",
+    "correct_evidence",
+    "reviewer_notes",
+]
+
+VALIDATION_RELATION_COLUMNS = [
+    "article_id",
+    "title",
+    "entity_a_label",
+    "entity_a_category",
+    "entity_b_label",
+    "entity_b_category",
+    "algorithm_association",
+    "algorithm_confidence",
+    "confidence_score",
+    "section",
+    "evidence_text",
+    "human_association",
+    "human_confidence",
+    "correct_evidence",
+    "reviewer_notes",
+]
+
+COOCCURRENCE_COLUMNS = [
+    "entity_a_label",
+    "entity_a_category",
+    "entity_b_label",
+    "entity_b_category",
+    "article_level_n_articles",
+    "evidence_level_n_articles",
+    "evidence_level_n_relations",
+    "weighted_evidence_score",
+    "possible_article_level_false_positives",
+    "article_ids_article_level",
+    "article_ids_evidence_level",
+    "interpretation",
+    "example_title",
+]
+
 
 def _yes_no(value: bool) -> str:
     return "Si" if value else "No"
@@ -161,7 +262,24 @@ def build_kwic_concordance(
                 "cue_negation": _yes_no(mention.cue_negation),
             }
         )
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows, columns=KWIC_COLUMNS)
+
+
+def _term_column(entity_type: str, info: dict[str, str]) -> str:
+    """Build the matrix column name for one entity.
+
+    The column has to be unique: two entities of the same variable can share a
+    ``label_es`` (the same common name under two categories), and an
+    English-only protocol leaves ``label_es`` empty for every entity. Keying on
+    the label alone made those entities overwrite each other inside the row
+    dict and silently destroyed their counts. The column is therefore
+    ``<entity_type>::<label>::<entity_id>``: readable at the front, unique at
+    the back, since ``entity_id`` is unique inside each variable. The full
+    label/category mapping stays available in ``entity_frequency_summary``.
+    """
+
+    label = info["label_es"] or info["label_en"] or info["entity_id"]
+    return f"{entity_type}::{label}::{info['entity_id']}"
 
 
 def build_term_frequency_tables(
@@ -221,13 +339,14 @@ def build_term_frequency_tables(
             term_id: math.log((1 + n_articles) / (1 + df_by_term[term_id])) + 1
             for term_id in terms
         }
+        columns_by_term = {term_id: _term_column(entity_type, entity_info[term_id]) for term_id in terms}
+        matrix_columns = ARTICLE_MATRIX_META_COLUMNS + [columns_by_term[term_id] for term_id in terms]
         for article_id in article_ids:
             count_row = {"article_id": article_id, **article_meta[article_id]}
             norm_row = {"article_id": article_id, **article_meta[article_id]}
             tfidf_row = {"article_id": article_id, **article_meta[article_id]}
             for term_id in terms:
-                label = entity_info[term_id]["label_es"]
-                column = f"{entity_type}::{label}"
+                column = columns_by_term[term_id]
                 value = int(counts[entity_type][article_id].get(term_id, 0))
                 count_row[column] = value
                 norm_row[column] = value / word_count_by_article[article_id] * 10000
@@ -236,9 +355,9 @@ def build_term_frequency_tables(
             norm_rows.append(norm_row)
             tfidf_rows.append(tfidf_row)
 
-        matrices[f"{entity_type}_article_term_counts"] = pd.DataFrame(count_rows)
-        matrices[f"{entity_type}_article_term_per_10k_words"] = pd.DataFrame(norm_rows)
-        matrices[f"{entity_type}_article_term_tfidf"] = pd.DataFrame(tfidf_rows)
+        matrices[f"{entity_type}_article_term_counts"] = pd.DataFrame(count_rows, columns=matrix_columns)
+        matrices[f"{entity_type}_article_term_per_10k_words"] = pd.DataFrame(norm_rows, columns=matrix_columns)
+        matrices[f"{entity_type}_article_term_tfidf"] = pd.DataFrame(tfidf_rows, columns=matrix_columns)
 
         for term_id in terms:
             raw_mentions = sum(counts[entity_type][article_id].get(term_id, 0) for article_id in article_ids)
@@ -262,9 +381,10 @@ def build_term_frequency_tables(
                 }
             )
 
-    matrices["entity_frequency_summary"] = pd.DataFrame(all_rows).sort_values(
-        ["entity_type", "raw_mentions"], ascending=[True, False]
-    )
+    frequency_summary = pd.DataFrame(all_rows, columns=ENTITY_FREQUENCY_COLUMNS)
+    if not frequency_summary.empty:
+        frequency_summary = frequency_summary.sort_values(["entity_type", "raw_mentions"], ascending=[True, False])
+    matrices["entity_frequency_summary"] = frequency_summary
     return matrices
 
 
@@ -345,7 +465,10 @@ def build_cooccurrence_comparison(
                 "example_title": articles_by_id[sorted(article_ids)[0]].title if article_ids and sorted(article_ids)[0] in articles_by_id else "",
             }
         )
-    return pd.DataFrame(rows).sort_values(
+    comparison = pd.DataFrame(rows, columns=COOCCURRENCE_COLUMNS)
+    if comparison.empty:
+        return comparison
+    return comparison.sort_values(
         ["weighted_evidence_score", "evidence_level_n_articles", "article_level_n_articles"],
         ascending=[False, False, False],
     )
@@ -356,22 +479,31 @@ def build_section_weight_tables(
     sections_config: SectionConfig,
 ) -> dict[str, pd.DataFrame]:
     rows = []
+    # The rationale describes what each rhetorical zone *contains*; it must not
+    # assert how the zone is weighted, because the weights live in the protocol
+    # and the user can edit any of them in the wizard. The weighting decision
+    # itself is reported by `current_pipeline_weight` and `weight_effect`,
+    # which are both derived from the live configuration.
     rationales = {
-        "title": "High signal for article focus, but not sufficient evidence alone.",
-        "abstract": "Concise summary of study focus and findings.",
-        "methods": "Strong signal for actual exposure, dose, population or experimental model.",
-        "results": "Strong signal for reported findings and measured outcomes.",
-        "discussion": "Interpretive section; useful but may include speculation.",
-        "conclusion": "Summary section; useful but often less detailed than results.",
-        "introduction": "Background section; higher risk of bibliographic or conceptual mentions.",
-        "references": "Bibliographic section; mentions are not treated as direct study evidence.",
-        "other": "Unclassified text; low positive weight by default.",
+        "title": "Announces the study focus; short, high-precision but low-recall zone.",
+        "abstract": "Condensed statement of focus, methods and main findings.",
+        "methods": "Describes the exposure, dose, population or experimental model actually used.",
+        "results": "Reports the measured outcomes and findings of the study.",
+        "discussion": "Interprets findings; mixes own results with cited work and speculation.",
+        "conclusion": "Restates the study's claims, usually with less detail than results.",
+        "introduction": "Frames the background; large proportion of cited, non-own work.",
+        "references": "Bibliographic list; mentions here belong to cited works, not to this study.",
+        "other": "Text that no header pattern managed to classify.",
     }
-    for section in sorted(SECTION_PROFILES["baseline_current"]):
+    sections_in_play = sorted(set(SECTION_PROFILES["baseline_current"]) | set(sections_config.weights))
+    for section in sections_in_play:
+        weight = section_weight(section, sections_config)
         rows.append(
             {
                 "section": section,
-                "current_pipeline_weight": section_weight(section, sections_config),
+                "active_profile": sections_config.active_profile,
+                "current_pipeline_weight": weight,
+                "weight_effect": "up_weighted" if weight > 0 else ("down_weighted" if weight < 0 else "neutral"),
                 "rationale": rationales.get(section, ""),
                 "methodological_status": "Heuristic informed by IMRaD/rhetorical-zone literature; not a validated scale.",
             }
@@ -391,6 +523,14 @@ def build_section_weight_tables(
             "n_mentions": summary.n_mentions,
             "sections": json.dumps(sections, ensure_ascii=False),
         }
+        # Reference column: the section score the run actually computed, using
+        # the live protocol weights (same lookup as classify.py). Without it
+        # the sensitivity table compares four fixed profiles against each
+        # other and never against the configuration that produced the results.
+        row["active_configured_section_score"] = sum(
+            int(count) * section_weight(section, sections_config)
+            for section, count in sections.items()
+        )
         for profile_name, weights in SECTION_PROFILES.items():
             row[f"{profile_name}_section_score"] = sum(
                 int(count) * weights.get(section, weights.get("other", 0))
@@ -404,30 +544,78 @@ def build_section_weight_tables(
     }
 
 
+def _allocate_per_stratum(sizes: list[int], n: int) -> list[int]:
+    """Split ``n`` draws over strata of the given sizes.
+
+    Every stratum receives the same quota while it still has rows to give; the
+    remainder is spilled into the strata that still have rows, largest first,
+    so nothing is lost to integer rounding. When there are more strata than
+    draws the ``n`` largest strata get one row each — the previous code kept
+    whatever fell in the first ``n`` positions of the alphabetical group order
+    and dropped the remaining strata without saying so. Ties break on stratum
+    position, so the allocation is deterministic.
+    """
+
+    quotas = [0] * len(sizes)
+    remaining = min(n, sum(sizes))
+    while remaining > 0:
+        eligible = [index for index, size in enumerate(sizes) if quotas[index] < size]
+        if not eligible:
+            break
+        share = remaining // len(eligible)
+        if share == 0:
+            for index in sorted(eligible, key=lambda position: (-sizes[position], position))[:remaining]:
+                quotas[index] += 1
+            break
+        for index in eligible:
+            take = min(share, sizes[index] - quotas[index])
+            quotas[index] += take
+            remaining -= take
+    return quotas
+
+
+def _confidence_sort_key(column: pd.Series) -> pd.Series:
+    """Order the Spanish confidence labels as Baja < Media < Alta.
+
+    Sorting the raw strings put ``Alta`` before ``Baja``, so an ascending sort
+    on the label did not order by confidence at all.
+    """
+
+    return column.map(CONFIDENCE_WEIGHT).fillna(0)
+
+
 def build_validation_templates(
     summaries: list[EntitySummary],
     relations: list[Relation],
     articles: list[Article],
     sample_size: int = 200,
+    validation_seed: int = DEFAULT_VALIDATION_SEED,
 ) -> dict[str, pd.DataFrame]:
     articles_by_id = _article_map(articles)
 
     def stratified_sample(dataframe: pd.DataFrame, columns: list[str], n: int) -> pd.DataFrame:
+        """Draw a stratified random sample of at most ``n`` rows.
+
+        Rows are drawn with ``DataFrame.sample(random_state=validation_seed)``
+        and not with ``head()``: the caller sorts the frame by score before
+        calling, so taking the head returned each stratum's best-scoring rows
+        and turned the manual-validation template into a best-case slice, which
+        biases any precision estimated from it upward. The fixed seed keeps the
+        draw reproducible; it is recorded in publication_pipeline_summary.json.
+        """
+
         if dataframe.empty or len(dataframe) <= n:
-            return dataframe
+            return dataframe.reset_index(drop=True)
         groups = list(dataframe.groupby(columns, dropna=False, sort=True))
-        per_group = max(1, n // max(1, len(groups)))
-        pieces = []
-        sampled_indices = []
-        for _, group in groups:
-            piece = group.head(per_group)
-            pieces.append(piece)
-            sampled_indices.extend(piece.index.tolist())
-        sampled = pd.concat(pieces) if pieces else dataframe.head(0)
-        if len(sampled) < n:
-            remaining = dataframe.drop(sampled_indices, errors="ignore").head(n - len(sampled))
-            sampled = pd.concat([sampled, remaining])
-        return sampled.head(n).reset_index(drop=True)
+        quotas = _allocate_per_stratum([len(group) for _, group in groups], n)
+        pieces = [
+            group.sample(n=quota, random_state=validation_seed)
+            for (_, group), quota in zip(groups, quotas)
+            if quota > 0
+        ]
+        if not pieces:
+            return dataframe.head(0).reset_index(drop=True)
+        return pd.concat(pieces).reset_index(drop=True)
 
     summary_rows = []
     for summary in summaries:
@@ -450,9 +638,13 @@ def build_validation_templates(
                 "reviewer_notes": "",
             }
         )
-    summary_df = pd.DataFrame(summary_rows)
+    summary_df = pd.DataFrame(summary_rows, columns=VALIDATION_ENTITY_COLUMNS)
     if not summary_df.empty:
-        summary_df = summary_df.sort_values(["algorithm_confidence", "n_mentions"], ascending=[True, False])
+        summary_df = summary_df.sort_values(
+            ["algorithm_confidence", "n_mentions"],
+            ascending=[True, False],
+            key=lambda column: _confidence_sort_key(column) if column.name == "algorithm_confidence" else column,
+        )
         summary_df = stratified_sample(summary_df, ["entity_type", "algorithm_role", "algorithm_confidence"], sample_size)
 
     relation_rows = []
@@ -477,7 +669,7 @@ def build_validation_templates(
                 "reviewer_notes": "",
             }
         )
-    relation_df = pd.DataFrame(relation_rows)
+    relation_df = pd.DataFrame(relation_rows, columns=VALIDATION_RELATION_COLUMNS)
     if not relation_df.empty:
         relation_df = relation_df.sort_values(["algorithm_association", "confidence_score"], ascending=[True, False])
         relation_df = stratified_sample(relation_df, ["algorithm_association", "algorithm_confidence"], sample_size)
@@ -508,6 +700,23 @@ def build_validation_templates(
     }
 
 
+def _sampling_coverage(
+    tables: dict[str, pd.DataFrame],
+    table_name: str,
+    stratum_columns: list[str],
+    prefix: str,
+) -> dict[str, int]:
+    """Realized size and stratum coverage of one manual-validation template."""
+
+    dataframe = tables.get(table_name)
+    if dataframe is None or dataframe.empty or not set(stratum_columns).issubset(dataframe.columns):
+        return {f"{prefix}_rows": 0, f"{prefix}_strata": 0}
+    return {
+        f"{prefix}_rows": int(len(dataframe)),
+        f"{prefix}_strata": int(dataframe.groupby(stratum_columns, dropna=False).ngroups),
+    }
+
+
 def export_publication_extensions(
     output_dir: str | Path,
     articles: list[Article],
@@ -517,6 +726,7 @@ def export_publication_extensions(
     protocol: Protocol,
     sample_size: int = 200,
     kwic_radius: int = 160,
+    validation_seed: int = DEFAULT_VALIDATION_SEED,
 ) -> dict[str, Path]:
     output = Path(output_dir)
     publication_dir = output / "publication_pipeline"
@@ -527,7 +737,15 @@ def export_publication_extensions(
     tables.update(build_term_frequency_tables(articles, mentions))
     tables["cooccurrence_article_vs_evidence"] = build_cooccurrence_comparison(articles, mentions, relations)
     tables.update(build_section_weight_tables(summaries, protocol.sections))
-    tables.update(build_validation_templates(summaries, relations, articles, sample_size=sample_size))
+    tables.update(
+        build_validation_templates(
+            summaries,
+            relations,
+            articles,
+            sample_size=sample_size,
+            validation_seed=validation_seed,
+        )
+    )
 
     paths: dict[str, Path] = {}
     for name, dataframe in tables.items():
@@ -551,6 +769,47 @@ def export_publication_extensions(
         "n_relations": len(relations),
         "kwic_radius_characters": kwic_radius,
         "manual_validation_sample_size": sample_size,
+        # Sampling and run configuration, so a deposited output folder is
+        # self-describing: the same corpus run with a different context radius
+        # or relation distance produces different numbers, and the validation
+        # template cannot be re-drawn without the seed.
+        "manual_validation_sampling": {
+            "method": "stratified random sample without replacement (pandas DataFrame.sample)",
+            "seed": validation_seed,
+            "allocation": (
+                "equal quota per stratum, remainder spilled into the largest strata; "
+                "if the sample size is smaller than the number of strata, the largest "
+                "strata receive one row each"
+            ),
+            **_sampling_coverage(
+                tables,
+                "manual_validation_entity_roles",
+                ["entity_type", "algorithm_role", "algorithm_confidence"],
+                "entity_roles",
+            ),
+            **_sampling_coverage(
+                tables,
+                "manual_validation_relations",
+                ["algorithm_association", "algorithm_confidence"],
+                "relations",
+            ),
+        },
+        "analysis_parameters": {
+            "context_radius": protocol.analysis.context_radius,
+            "kwic_radius": protocol.analysis.kwic_radius,
+            "relation_distance": protocol.analysis.relation_distance,
+            "kmeans_k": protocol.analysis.kmeans_k,
+            "validation_sample_size": protocol.analysis.validation_sample_size,
+            "note": (
+                "Values configured in the protocol. `kwic_radius_characters` and "
+                "`manual_validation_sample_size` above are the values this run "
+                "actually used, which a CLI override can change."
+            ),
+        },
+        "section_weights": {
+            "active_profile": protocol.sections.active_profile,
+            "weights": dict(protocol.sections.weights),
+        },
         "protocol": {
             "name": protocol.identity.name,
             "variable_a": protocol.variable_a.display_name,

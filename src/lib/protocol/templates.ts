@@ -13,6 +13,16 @@
  *
  * Cues, sections, and analysis params come from the regular defaults, so
  * the templates only need to provide identity + variables.
+ *
+ * Pattern hygiene: the pipeline compiles every pattern case-insensitively
+ * (review_miner/protocol.py `_compile_patterns`), so a bare two-letter
+ * chemical symbol such as `\bpb\b` also matches "PB" (phosphate buffer) and
+ * "pb" (base pairs), and `\bcd\b` matches "CD" (circular dichroism, Crohn's
+ * disease, cluster of differentiation). Those hits are scored exactly like a
+ * genuine mention. Symbols are therefore only searched together with the
+ * context that makes them unambiguous — an oxidation state or a measurement
+ * word — and short abbreviations that are also ordinary words are anchored
+ * the same way.
  */
 
 import { createEmptyDraft } from "./draft";
@@ -53,6 +63,20 @@ function category(
   return { id, kind: "category", labelEs, labelEn, children };
 }
 
+/**
+ * Patterns for a two-letter element symbol, each anchored to context that an
+ * unrelated abbreviation would not carry: an oxidation state (`Pb(II)`,
+ * `Cd2+`) or a measurement word next to it (`Hg exposure`, `niveles de Cd`).
+ * A bare `\bpb\b` is never emitted — see the note at the top of the file.
+ */
+function symbolPatterns(symbol: string): string[] {
+  return [
+    `\\b${symbol}\\s*\\(?\\s*(?:ii|2\\s*\\+)\\s*\\)?`,
+    `\\b${symbol}\\s+(?:exposure|concentrations?|levels?|poisoning|toxicity)\\b`,
+    `\\b(?:exposici[oó]n|concentraci[oó]n|niveles|intoxicaci[oó]n)\\s+(?:de\\s+)?${symbol}\\b`
+  ];
+}
+
 function buildContaminantsDiseases(): ProtocolDraft {
   const draft = createEmptyDraft();
   draft.identity = {
@@ -69,10 +93,27 @@ function buildContaminantsDiseases(): ProtocolDraft {
   };
   draft.variableA.nodes = [
     category("metales_pesados", "Metales pesados", "Heavy metals", [
-      term("plomo", "Plomo", "Lead", ["\\bplomo\\b", "\\blead\\b", "\\bpb\\b"]),
-      term("cadmio", "Cadmio", "Cadmium", ["\\bcadmio\\b", "\\bcadmium\\b", "\\bcd\\b"]),
+      // "lead" is also an ordinary English verb: the lookahead drops the
+      // "may lead to …" construction without losing "lead exposure".
+      term("plomo", "Plomo", "Lead", [
+        "\\bplomo\\b",
+        "\\blead\\b(?!\\s+(?:to|author|investigator))",
+        ...symbolPatterns("pb")
+      ]),
+      term("cadmio", "Cadmio", "Cadmium", [
+        "\\bcadmio\\b",
+        "\\bcadmium\\b",
+        ...symbolPatterns("cd")
+      ]),
+      // Arsenic's symbol ("As") is deliberately not searched: it is an
+      // English word, so under case-insensitive matching it would flood the
+      // lexicon with false positives.
       term("arsenico", "Arsénico", "Arsenic", ["\\bars[eé]nico\\b", "\\barsenic\\b"]),
-      term("mercurio", "Mercurio", "Mercury", ["\\bmercurio\\b", "\\bmercury\\b", "\\bhg\\b"]),
+      term("mercurio", "Mercurio", "Mercury", [
+        "\\bmercurio\\b",
+        "\\bmercury\\b",
+        ...symbolPatterns("hg")
+      ]),
       term("manganeso", "Manganeso", "Manganese", ["\\bmanganeso\\b", "\\bmanganese\\b"])
     ]),
     category("pesticidas", "Pesticidas", "Pesticides", [
@@ -96,11 +137,15 @@ function buildContaminantsDiseases(): ProtocolDraft {
       "\\benfermedad de parkinson\\b",
       "\\bparkinsonism(?:o)?\\b"
     ]),
+    // "ELA" alone also matches the Portuguese pronoun and surnames, so the
+    // abbreviation is only accepted where Spanish text actually places it:
+    // introduced in parentheses or preceded by an article/preposition.
     term("ela", "Esclerosis lateral amiotrófica", "Amyotrophic lateral sclerosis", [
       "\\bamyotrophic lateral sclerosis\\b",
       "\\besclerosis lateral amiotr[oó]fica\\b",
       "\\bals\\b",
-      "\\bela\\b"
+      "\\(\\s*ela\\s*\\)",
+      "\\b(?:la|de|con)\\s+ela\\b"
     ]),
     term("demencia", "Demencia", "Dementia", ["\\bdemencia\\b", "\\bdementia\\b"]),
     term("huntington", "Huntington", "Huntington's disease", [
@@ -207,7 +252,8 @@ function buildSpeciesEcosystems(): ProtocolDraft {
     ]),
     term("humedales", "Humedales", "Wetlands", ["\\bhumedal(es)?\\b", "\\bwetlands?\\b"]),
     term("rios", "Ríos y cuerpos de agua dulce", "Freshwater rivers and bodies", [
-      "\\br[ií]os?\\b",
+      // The lookahead keeps place names out (affiliations, study sites).
+      "\\br[ií]os?\\b(?!\\s+(?:de\\s+janeiro|grande|negro))",
       "\\bfreshwater\\b",
       "\\blake(s)?\\b",
       "\\blago(s)?\\b"

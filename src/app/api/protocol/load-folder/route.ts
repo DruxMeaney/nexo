@@ -22,6 +22,7 @@ import {
   DEFAULT_PROTOCOLS_DIR
 } from "@/lib/server/project";
 import { folderToDraft } from "@/lib/protocol/folder";
+import { assertSameOrigin } from "@/lib/server/request-origin";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,7 @@ interface LoadBody {
 
 export async function POST(request: Request) {
   try {
+    assertSameOrigin(request);
     assertLocalProcessingAllowed();
     const body = (await request.json()) as LoadBody;
     const slug = body.slug?.trim();

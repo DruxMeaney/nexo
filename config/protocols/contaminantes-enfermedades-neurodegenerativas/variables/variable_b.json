@@ -1,0 +1,187 @@
+{
+  "version": "2.0",
+  "metadata": {
+    "displayNameEs": "Enfermedades neurodegenerativas",
+    "displayNameEn": "Neurodegenerative diseases",
+    "mode": "hierarchical"
+  },
+  "taxonomy": [
+    {
+      "id": "alzheimer",
+      "kind": "category",
+      "labelEs": "Alzheimer",
+      "labelEn": "Alzheimer",
+      "children": [
+        {
+          "id": "alzheimers_disease",
+          "kind": "term",
+          "labelEs": "Alzheimer",
+          "labelEn": "Alzheimer's disease",
+          "patterns": [
+            "\\balzheimer'?s?\\b",
+            "\\benfermedad de alzheimer\\b",
+            "\\bad\\b",
+            "\\bamyloid\\b",
+            "\\bamiloide\\b",
+            "\\btau\\b"
+          ],
+          "generic": false
+        }
+      ]
+    },
+    {
+      "id": "parkinson",
+      "kind": "category",
+      "labelEs": "Parkinson",
+      "labelEn": "Parkinson",
+      "children": [
+        {
+          "id": "parkinsons_disease",
+          "kind": "term",
+          "labelEs": "Parkinson",
+          "labelEn": "Parkinson's disease",
+          "patterns": [
+            "\\bparkinson'?s?\\b",
+            "\\benfermedad de parkinson\\b",
+            "\\bparkinsonism\\b",
+            "\\bparkinsonismo\\b",
+            "\\bdopaminergic\\b",
+            "\\bdopamin[eé]rgic[ao]s?\\b"
+          ],
+          "generic": false
+        }
+      ]
+    },
+    {
+      "id": "esclerosis_lateral_amiotrofica",
+      "kind": "category",
+      "labelEs": "Esclerosis lateral amiotrofica",
+      "labelEn": "Esclerosis lateral amiotrofica",
+      "children": [
+        {
+          "id": "amyotrophic_lateral_sclerosis",
+          "kind": "term",
+          "labelEs": "Esclerosis lateral amiotrofica",
+          "labelEn": "amyotrophic lateral sclerosis",
+          "patterns": [
+            "\\bamyotrophic lateral sclerosis\\b",
+            "\\besclerosis lateral amiotr[oó]fica\\b",
+            "\\bals\\b",
+            "\\bela\\b",
+            "\\bmotor neuron disease\\b",
+            "\\bmotoneuron disease\\b"
+          ],
+          "generic": false
+        }
+      ]
+    },
+    {
+      "id": "huntington",
+      "kind": "category",
+      "labelEs": "Huntington",
+      "labelEn": "Huntington",
+      "children": [
+        {
+          "id": "huntingtons_disease",
+          "kind": "term",
+          "labelEs": "Huntington",
+          "labelEn": "Huntington's disease",
+          "patterns": [
+            "\\bhuntington'?s?\\b",
+            "\\benfermedad de huntington\\b"
+          ],
+          "generic": false
+        }
+      ]
+    },
+    {
+      "id": "demencia",
+      "kind": "category",
+      "labelEs": "Demencia",
+      "labelEn": "Demencia",
+      "children": [
+        {
+          "id": "dementia",
+          "kind": "term",
+          "labelEs": "demencia",
+          "labelEn": "dementia",
+          "patterns": [
+            "\\bdementia\\b",
+            "\\bdemencia\\b",
+            "\\bvascular dementia\\b",
+            "\\bdemencia vascular\\b",
+            "\\bmixed dementia\\b",
+            "\\bdemencia mixta\\b"
+          ],
+          "generic": false
+        }
+      ]
+    },
+    {
+      "id": "deterioro_cognitivo",
+      "kind": "category",
+      "labelEs": "Deterioro cognitivo",
+      "labelEn": "Deterioro cognitivo",
+      "children": [
+        {
+          "id": "cognitive_impairment",
+          "kind": "term",
+          "labelEs": "deterioro cognitivo",
+          "labelEn": "cognitive impairment",
+          "patterns": [
+            "\\bcognitive impairment\\b",
+            "\\bdeterioro cognitivo\\b",
+            "\\bmild cognitive impairment\\b",
+            "\\bmci\\b",
+            "\\bneuropsychological functioning\\b",
+            "\\bmemory impairment\\b"
+          ],
+          "generic": false
+        }
+      ]
+    },
+    {
+      "id": "otras_enfermedades_detectadas",
+      "kind": "category",
+      "labelEs": "Otras enfermedades detectadas",
+      "labelEn": "Otras enfermedades detectadas",
+      "children": [
+        {
+          "id": "multiple_sclerosis",
+          "kind": "term",
+          "labelEs": "esclerosis multiple",
+          "labelEn": "multiple sclerosis",
+          "patterns": [
+            "\\bmultiple sclerosis\\b",
+            "\\besclerosis m[uú]ltiple\\b",
+            "\\bdemyelinating\\b",
+            "\\bdesmielinizaci[oó]n\\b"
+          ],
+          "generic": false
+        }
+      ]
+    },
+    {
+      "id": "enfermedades_neurodegenerativas_generales",
+      "kind": "category",
+      "labelEs": "Enfermedades neurodegenerativas generales",
+      "labelEn": "Enfermedades neurodegenerativas generales",
+      "children": [
+        {
+          "id": "neurodegeneration_general",
+          "kind": "term",
+          "labelEs": "neurodegeneracion general",
+          "labelEn": "general neurodegeneration",
+          "patterns": [
+            "\\bneurodegenerative diseases?\\b",
+            "\\bneurodegeneraci[oó]n\\b",
+            "\\bneurodegenerative disorders?\\b",
+            "\\bneurotoxicity\\b",
+            "\\bneurotoxicidad\\b"
+          ],
+          "generic": false
+        }
+      ]
+    }
+  ]
+}

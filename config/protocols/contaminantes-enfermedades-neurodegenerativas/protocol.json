@@ -1,11 +1,11 @@
 {
   "version": "1.0",
-  "savedAt": "2026-06-11T17:08:22.153Z",
+  "savedAt": "2026-07-31T15:00:00Z",
   "draftVersion": 1,
   "identity": {
-    "name": "Smoke test - Contaminantes y enfermedades",
-    "description": "Audit run",
-    "author": "NEXO QA",
+    "name": "Contaminantes ambientales y enfermedades neurodegenerativas",
+    "description": "Protocolo de ejemplo: relaciona contaminantes ambientales (metales pesados, pesticidas, contaminantes orgánicos persistentes, entre otros) con enfermedades neurodegenerativas en literatura científica bilingüe. Listo para ejecutarse sobre un corpus propio.",
+    "author": "NEXO — protocolo de ejemplo",
     "corpusLanguage": "bilingual"
   },
   "analysis": {

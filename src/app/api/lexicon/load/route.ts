@@ -1,14 +1,23 @@
 import fs from "node:fs/promises";
 import { NextResponse } from "next/server";
-import { DEFAULT_CONTAMINANTS, DEFAULT_DISEASES, resolveUserPath } from "@/lib/server/project";
+import {
+  assertLocalProcessingAllowed,
+  assertProjectFile,
+  DEFAULT_CONTAMINANTS,
+  DEFAULT_DISEASES,
+  resolveUserPath
+} from "@/lib/server/project";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
+    assertLocalProcessingAllowed();
     const body = (await request.json()) as { path?: string; preset?: "contaminants" | "diseases" };
     const fallback = body.preset === "diseases" ? DEFAULT_DISEASES : DEFAULT_CONTAMINANTS;
     const filePath = resolveUserPath(body.path, fallback);
+    // Igual que /api/files/*: solo se leen archivos del proyecto local.
+    assertProjectFile(filePath);
     const payload = JSON.parse(await fs.readFile(filePath, "utf8"));
     return NextResponse.json({ path: filePath, payload });
   } catch (error) {

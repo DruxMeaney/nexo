@@ -22,7 +22,7 @@ from collections import Counter
 
 from .protocol import CueSet, SectionConfig
 from .schema import Article, EntitySummary, Mention
-from .sections import CENTRAL_SECTIONS, INFORMATIVE_SECTIONS, section_weight
+from .sections import CENTRAL_SECTIONS, PERIPHERAL_SECTIONS, TERMINAL_SECTION, section_weight
 
 
 # --------------------------------------------------------------------------- #
@@ -150,10 +150,12 @@ def _best_evidence(
     sections: SectionConfig,
     limit: int = 3,
 ) -> str:
+    """Quote the most evidential mentions: central first, bibliography last."""
+
     ordered = sorted(
         mentions,
         key=lambda item: (
-            0 if item.section in CENTRAL_SECTIONS else 1,
+            0 if item.section in CENTRAL_SECTIONS else 2 if item.section == TERMINAL_SECTION else 1,
             -int(item.cue_dose),
             -int(item.cue_exposure),
             -mention_score(item, sections),
@@ -173,7 +175,7 @@ def _assign_role(
     n_mentions: int,
     score: int,
     central_count: int,
-    informative_count: int,
+    peripheral_count: int,
     direct_cues: int,
     association_cues: int,
 ) -> tuple[str, str]:
@@ -185,6 +187,12 @@ def _assign_role(
     contaminant-side strictness (score >= 16 with direct cues) and the
     disease-side flexibility (any direct/association cue is enough for a
     "probable focus") into a single ladder.
+
+    ``peripheral_count`` counts mentions in the informative-but-not-central
+    sections (introduction, discussion, conclusion). Gating the
+    "intro/discussion only" role on that count is what makes the role match
+    its name: an introduction-only entity now reaches it, and a
+    central-section entity with a sub-threshold score no longer does.
     """
 
     if article_kind == ARTICLE_KIND_REVIEW:
@@ -197,7 +205,7 @@ def _assign_role(
         return ROLE_PROBABLE_FOCUS, "inferencia_contextual_con_evidencia_textual"
     if central_count > 0 and score >= 8:
         return ROLE_SECONDARY, "inferencia_contextual_con_evidencia_textual"
-    if informative_count > 0:
+    if peripheral_count > 0:
         return ROLE_INTRO_DISCUSSION, "extraccion_literal"
     return ROLE_UNCLEAR, "extraccion_literal"
 
@@ -209,11 +217,19 @@ def summarize_entity(
     sections: SectionConfig,
 ) -> EntitySummary:
     counts = Counter(m.section for m in mentions)
-    score = sum(mention_score(m, sections) for m in mentions)
+    # A bibliography hit proves the entity is cited, not studied. The cue
+    # bonuses in ``mention_score`` are section-independent and larger than
+    # the references weight, so a reference-list mention would otherwise
+    # score net-positive and could push an entity into the top role. Such
+    # mentions stay in ``n_mentions`` and in ``sections`` — the
+    # bibliographic-only test below still needs them — but they never feed
+    # the score or the cue counters.
+    scored = [m for m in mentions if m.section != TERMINAL_SECTION]
+    score = sum(mention_score(m, sections) for m in scored)
     central_count = sum(counts[s] for s in CENTRAL_SECTIONS)
-    informative_count = sum(counts[s] for s in INFORMATIVE_SECTIONS)
-    direct_cues = sum(1 for m in mentions if m.cue_exposure or m.cue_dose)
-    association_cues = sum(1 for m in mentions if m.cue_association)
+    peripheral_count = sum(counts[s] for s in PERIPHERAL_SECTIONS)
+    direct_cues = sum(1 for m in scored if m.cue_exposure or m.cue_dose)
+    association_cues = sum(1 for m in scored if m.cue_association)
 
     role, basis = _assign_role(
         article.article_kind,
@@ -221,7 +237,7 @@ def summarize_entity(
         n_mentions=len(mentions),
         score=score,
         central_count=central_count,
-        informative_count=informative_count,
+        peripheral_count=peripheral_count,
         direct_cues=direct_cues,
         association_cues=association_cues,
     )

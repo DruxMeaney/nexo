@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import re
+import sys
 from pathlib import Path
 from typing import Iterable
 
@@ -17,6 +18,13 @@ from .schema import Article
 
 DOI_RE = re.compile(r"\b10\.\d{4,9}/[-._;()/:A-Z0-9]+\b", flags=re.IGNORECASE)
 YEAR_RE = re.compile(r"\b(19[5-9]\d|20[0-3]\d)\b")
+
+# Page break marker inserted between PDF pages so `text.page_for_position`
+# reports the real page instead of a proportional estimate. The newline on
+# each side keeps `^`-anchored section headers matchable at a page start.
+PAGE_SEPARATOR = "\n\f\n"
+
+INPUT_SUFFIXES = (".pdf", ".txt", ".md")
 
 
 def natural_key(path: Path) -> tuple[str, int, str]:
@@ -34,7 +42,10 @@ def clean_pdf_text(text: str) -> str:
     """Light cleanup that preserves evidence text while reducing PDF extraction noise."""
 
     text = (text or "").replace("\x00", " ")
-    text = re.sub(r"(\w)-\s*\n\s*(\w)", r"\1\2", text)
+    # Join only a soft line-break hyphen: a single newline, no blank line in
+    # between. Otherwise a paragraph ending in a hyphen is glued to the next
+    # paragraph and both words stop being \b-matchable.
+    text = re.sub(r"(\w)-[ \t]*\n[ \t]*(\w)", r"\1\2", text)
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
@@ -50,10 +61,14 @@ def extract_pdf(path: Path) -> tuple[str, int, str]:
     parts = []
     for page in reader.pages:
         try:
-            parts.append(page.extract_text() or "")
+            raw = page.extract_text() or ""
         except Exception:
-            parts.append("")
-    return clean_pdf_text("\n\n".join(parts)), len(reader.pages), metadata_title
+            raw = ""
+        # Clean each page on its own so the joined text has exactly one
+        # marker per page break: any \f the extractor emitted itself would
+        # otherwise be miscounted as an extra page.
+        parts.append(clean_pdf_text(raw.replace("\f", "\n")))
+    return PAGE_SEPARATOR.join(parts), len(reader.pages), metadata_title
 
 
 def extract_text_file(path: Path) -> tuple[str, int, str]:
@@ -61,10 +76,23 @@ def extract_text_file(path: Path) -> tuple[str, int, str]:
 
 
 def discover_input_files(input_dir: str | Path) -> list[Path]:
+    """Corpus files in ``input_dir``, matching extensions case-insensitively.
+
+    `Path.glob("*.pdf")` is case-sensitive on macOS/Linux, so 'A80.PDF' used
+    to be dropped from the corpus without any message.
+    """
+
     root = Path(input_dir)
-    files: list[Path] = []
-    for suffix in ("*.pdf", "*.txt", "*.md"):
-        files.extend(root.glob(suffix))
+    if not root.is_dir():
+        print(f"[io] AVISO: la carpeta de entrada no existe: {root}", file=sys.stderr, flush=True)
+        return []
+    files = [
+        path
+        for path in root.iterdir()
+        if path.is_file() and path.suffix.lower() in INPUT_SUFFIXES
+    ]
+    if not files:
+        print(f"[io] AVISO: no se encontraron archivos {'/'.join(INPUT_SUFFIXES)} en {root}", file=sys.stderr, flush=True)
     return sorted(files, key=natural_key)
 
 
@@ -155,20 +183,41 @@ def _read_csv_metadata(path: Path) -> dict[str, dict[str, str]]:
 
 
 def _title_tokens(title: str) -> set[str]:
+    # Domain-neutral stoplist: only generic academic wording, so metadata
+    # matching is not biased towards any particular review topic.
     stop = {
         "study",
+        "studies",
+        "estudio",
+        "estudios",
         "article",
-        "water",
-        "disease",
-        "effects",
+        "articulo",
+        "artículo",
+        "review",
+        "revision",
+        "revisión",
+        "analysis",
+        "analisis",
+        "análisis",
+        "results",
+        "resultados",
         "effect",
-        "exposure",
-        "contaminants",
-        "contaminantes",
+        "effects",
+        "efecto",
+        "efectos",
         "between",
+        "entre",
         "relation",
+        "relacion",
+        "relación",
         "association",
-        "neurodegenerative",
+        "asociacion",
+        "asociación",
+        "among",
+        "based",
+        "using",
+        "evidence",
+        "evidencia",
     }
     return {
         token.lower()

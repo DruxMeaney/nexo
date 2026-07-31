@@ -32,6 +32,7 @@ import {
 } from "@/lib/server/project";
 import { draftToFolder, slugifyName } from "@/lib/protocol/folder";
 import type { ProtocolDraft } from "@/lib/protocol/types";
+import { assertSameOrigin } from "@/lib/server/request-origin";
 
 export const dynamic = "force-dynamic";
 
@@ -41,8 +42,18 @@ interface SaveBody {
   overwrite?: boolean;
 }
 
+/**
+ * Canonical slug alphabet, shared with /api/protocol/load-folder,
+ * /api/protocol/[slug], /ejecutar and startProtocolPipeline. An explicit slug
+ * is used verbatim after this check: re-slugifying it would rewrite '_' to '-'
+ * and send the save to a different folder than the one the guard tested, so an
+ * existing protocol with underscores could never be overwritten.
+ */
+const SLUG_PATTERN = /^[a-z0-9][a-z0-9_-]*$/i;
+
 export async function POST(request: Request) {
   try {
+    assertSameOrigin(request);
     assertLocalProcessingAllowed();
     const body = (await request.json()) as SaveBody;
     if (!body.draft) {
@@ -50,8 +61,11 @@ export async function POST(request: Request) {
     }
     const draft = body.draft;
 
-    const requestedSlug = body.slug?.trim() || slugifyName(draft.identity.name);
-    const slug = slugifyName(requestedSlug);
+    const requestedSlug = body.slug?.trim();
+    if (requestedSlug && !SLUG_PATTERN.test(requestedSlug)) {
+      return NextResponse.json({ error: "invalid_slug", slug: requestedSlug }, { status: 400 });
+    }
+    const slug = requestedSlug || slugifyName(draft.identity.name);
     const folder = path.join(DEFAULT_PROTOCOLS_DIR, slug);
 
     if (!body.overwrite) {

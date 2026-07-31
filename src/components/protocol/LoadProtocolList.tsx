@@ -11,7 +11,7 @@ import {
   Play,
   Sparkles
 } from "lucide-react";
-import type { Dictionary } from "@/lib/i18n/dictionaries";
+import type { Dictionary, Locale } from "@/lib/i18n/dictionaries";
 import type { ProtocolDraft } from "@/lib/protocol/types";
 
 interface ProtocolListItem {
@@ -32,12 +32,13 @@ interface LoadResponse {
 const STORAGE_KEY = "nexo.protocol-draft.v1";
 
 /**
- * Format a saved timestamp using the navigator's locale, with a long-form
- * style that avoids ambiguous "11/6/2026". E.g. "6 nov 2026, 11:08".
+ * Format a saved timestamp using the UI locale (the one picked with the
+ * language toggle, not the browser's), with a long-form style that avoids
+ * ambiguous "11/6/2026". E.g. "6 nov 2026, 11:08".
  */
-function formatSavedAt(iso: string): string {
+function formatSavedAt(iso: string, locale: Locale): string {
   try {
-    return new Intl.DateTimeFormat(undefined, {
+    return new Intl.DateTimeFormat(locale, {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -47,6 +48,17 @@ function formatSavedAt(iso: string): string {
   } catch {
     return iso;
   }
+}
+
+/**
+ * Split a warning emitted by `folderToDraft` into its reason and the file it
+ * refers to. The loader prefixes each entry with `missing:` or `invalid:`;
+ * anything else is rendered as a bare filename.
+ */
+function parseWarning(warning: string): { reason: "missing" | "invalid" | null; file: string } {
+  if (warning.startsWith("missing:")) return { reason: "missing", file: warning.slice(8) };
+  if (warning.startsWith("invalid:")) return { reason: "invalid", file: warning.slice(8) };
+  return { reason: null, file: warning };
 }
 
 interface Props {
@@ -167,12 +179,21 @@ export function LoadProtocolList({ t }: Props) {
         <div className="notice" role="status">
           <strong>{t.loadProtocol.warningsTitle}</strong>
           <ul style={{ margin: "6px 0 0 18px", padding: 0 }}>
-            {warnings.map((file) => (
-              <li key={file} className="mono">
-                {file}
-              </li>
-            ))}
+            {warnings.map((warning) => {
+              const { reason, file } = parseWarning(warning);
+              return (
+                <li key={warning}>
+                  {reason === "missing"
+                    ? `${t.loadProtocol.warningMissingLabel} `
+                    : reason === "invalid"
+                    ? `${t.loadProtocol.warningInvalidLabel} `
+                    : null}
+                  <span className="mono">{file}</span>
+                </li>
+              );
+            })}
           </ul>
+          <p style={{ margin: "8px 0 0" }}>{t.loadProtocol.warningFallbackNote}</p>
         </div>
       ) : null}
       {rowError ? (
@@ -199,7 +220,7 @@ export function LoadProtocolList({ t }: Props) {
                 <>
                   {t.loadProtocol.savedAtPrefix}{" "}
                   <time dateTime={item.savedAt}>
-                    {formatSavedAt(item.savedAt)}
+                    {formatSavedAt(item.savedAt, t.localeCode)}
                   </time>
                 </>
               ) : null}

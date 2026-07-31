@@ -1,0 +1,22 @@
+# Entorno Python exacto del pipeline (pip freeze del entorno de trabajo).
+# Uso: reproduccion exacta de resultados publicados.
+#   python3 -m venv .venv
+#   .venv/bin/python -m pip install -r requirements-lock.txt
+# Para instalacion normal (rangos flexibles) usa requirements_review_miner.txt.
+#
+# Interprete verificado: CPython 3.14.6 (macOS arm64).
+# numpy 2.5.1 exige Python >= 3.12 y pandas 3.0.5 exige Python >= 3.11,
+# asi que este archivo requiere Python 3.12 o superior.
+#
+# matplotlib no aparece aqui: solo lo necesitan los dos scripts de figuras
+# auxiliares. Si los vas a correr, instala ademas "matplotlib>=3.8,<4".
+et_xmlfile==2.0.0
+lxml==6.1.1
+numpy==2.5.1
+openpyxl==3.1.5
+pandas==3.0.5
+pypdf==6.14.2
+python-dateutil==2.9.0.post0
+python-docx==1.2.0
+six==1.17.0
+typing_extensions==4.16.0

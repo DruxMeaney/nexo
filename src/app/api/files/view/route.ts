@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { NextResponse } from "next/server";
-import { assertProjectFile, resolveUserPath } from "@/lib/server/project";
+import { assertReadablePath, resolveUserPath } from "@/lib/server/project";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Falta path." }, { status: 400 });
     }
     const filePath = resolveUserPath(rawPath, rawPath);
-    assertProjectFile(filePath);
+    assertReadablePath(filePath);
     const ext = path.extname(filePath).toLowerCase();
     if (!CONTENT_TYPES[ext]) {
       return NextResponse.json({ error: "Tipo de archivo no visible en navegador." }, { status: 400 });

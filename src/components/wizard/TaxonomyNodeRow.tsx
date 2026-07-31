@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useMemo } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -16,8 +16,12 @@ import {
   removeNode,
   updateNode
 } from "@/lib/protocol/draft";
+import { findInvalidPatterns } from "@/lib/protocol/validation";
 import type { TaxonomyMode, TaxonomyNode } from "@/lib/protocol/types";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+
+/** Stable empty array so the pattern check memo does not re-run for categories. */
+const EMPTY_PATTERNS: string[] = [];
 
 interface Props {
   node: TaxonomyNode;
@@ -76,7 +80,12 @@ export function TaxonomyNodeRow({
 
   const isCategory = node.kind === "category";
   const isTerm = node.kind === "term";
-  const isInvalid = isTerm && incompleteIds.has(node.id);
+  // Patterns the pipeline could not compile: it drops them, and a term that
+  // loses all of its patterns disappears from the lexicon entirely.
+  const patterns = node.kind === "term" ? node.patterns : EMPTY_PATTERNS;
+  const invalidPatterns = useMemo(() => findInvalidPatterns(patterns), [patterns]);
+  const isInvalid =
+    isTerm && (incompleteIds.has(node.id) || invalidPatterns.length > 0);
 
   return (
     <div
@@ -161,6 +170,17 @@ export function TaxonomyNodeRow({
                 spellCheck={false}
               />
               <p className="help-text">{t.wizard.taxonomy.fieldPatternsHint}</p>
+              {invalidPatterns.length > 0 ? (
+                <p className="help-text" style={{ color: "var(--rust)" }} role="alert">
+                  {t.wizard.taxonomy.invalidPatternsLabel}{" "}
+                  {invalidPatterns.map((pattern, index) => (
+                    <span key={pattern}>
+                      {index > 0 ? ", " : ""}
+                      <code className="mono">{pattern}</code>
+                    </span>
+                  ))}
+                </p>
+              ) : null}
             </div>
             <label className="check-row">
               <input

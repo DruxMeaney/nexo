@@ -5,6 +5,7 @@ import path from "node:path";
 import { promisify } from "node:util";
 import { NextResponse } from "next/server";
 import { assertLocalProcessingAllowed, PROJECT_ROOT } from "@/lib/server/project";
+import { assertSameOrigin } from "@/lib/server/request-origin";
 
 export const dynamic = "force-dynamic";
 
@@ -101,6 +102,7 @@ async function windowsDialog(body: DialogBody) {
 
 export async function POST(request: Request) {
   try {
+    assertSameOrigin(request);
     assertLocalProcessingAllowed();
     const body = (await request.json().catch(() => ({}))) as DialogBody;
     const mode = body.mode || "folder";

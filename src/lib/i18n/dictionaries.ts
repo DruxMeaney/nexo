@@ -18,12 +18,18 @@ export const DEFAULT_LOCALE: Locale = "es";
 
 export const dictionaries = {
   es: {
+    /**
+     * Código del idioma de este diccionario. Los componentes cliente reciben
+     * `t` como prop (no la cookie), así que esta llave es su única forma de
+     * saber en qué idioma están al formatear fechas o elegir un nombre
+     * bilingüe.
+     */
+    localeCode: "es",
     common: {
       brand: "NEXO",
       tagline: "Minería de datos para revisiones.",
       back: "Volver",
       next: "Siguiente",
-      cancel: "Cancelar",
       save: "Guardar",
       load: "Cargar",
       loading: "Cargando...",
@@ -49,6 +55,9 @@ export const dictionaries = {
       ctaStart: "Comenzar revisión",
       ctaResults: "Ver resultados existentes",
       heroImageAlt: "Visualización real generada por el pipeline",
+      sectionIndexMethod: "01 — Método",
+      sectionIndexPrivacy: "02 — Privacidad",
+      sectionIndexOutputs: "03 — Salidas",
       methodEyebrow: "PRISMA + evidencia textual",
       methodTitle: "De PDFs a resultados auditables",
       methodCopy:
@@ -214,7 +223,11 @@ export const dictionaries = {
       resetConfirm:
         "Esto borrará todo lo que has llenado en el diseñador. ¿Quieres continuar?",
       draftSaved: "Borrador guardado en tu navegador",
-      importJsonLabel: "Importar JSON",
+      blockedTitle: "Hay pasos anteriores incompletos:",
+      blockedSummaryTitle: "Todavía no puedes guardar este protocolo",
+      blockedCopy:
+        "El pipeline no puede ejecutarse con esta configuración. Corrige los pasos listados y vuelve aquí.",
+      blockedGoToStep: "Ir a “{step}”",
       importJsonHint: "Carga un archivo .json compatible (formato legacy o v2)",
       importError: "No pude leer este archivo",
       importErrorInvalidJson: "El archivo no es JSON válido",
@@ -270,8 +283,12 @@ export const dictionaries = {
         variableB: "Variable B",
         fieldDisplayNameEs: "Nombre en español",
         fieldDisplayNameEn: "Nombre en inglés",
-        fieldDisplayNamePlaceholderA: "Ej. Contaminantes",
-        fieldDisplayNamePlaceholderB: "Ej. Enfermedades",
+        // Un placeholder por campo: el ejemplo va en el idioma del campo, y
+        // la fórmula (“Ej.” / “e.g.”) en el idioma de la interfaz.
+        fieldDisplayNamePlaceholderAEs: "Ej. Contaminantes",
+        fieldDisplayNamePlaceholderAEn: "Ej. Contaminants",
+        fieldDisplayNamePlaceholderBEs: "Ej. Enfermedades",
+        fieldDisplayNamePlaceholderBEn: "Ej. Diseases",
         fieldMode: "Estructura de la lista",
         modeFlat: "Lista plana",
         modeFlatHint: "Sólo nombres de términos sin categorías. Ideal cuando los elementos no se agrupan jerárquicamente.",
@@ -300,6 +317,8 @@ export const dictionaries = {
         fieldPatterns: "Patrones regex (uno por línea)",
         fieldPatternsHint:
           "Cada patrón se evalúa sin distinguir mayúsculas. Usa `\\b...\\b` para coincidir palabras completas. Ej. `\\bplomo\\b`",
+        invalidPatternsLabel:
+          "Estos patrones no son expresiones regulares válidas y el pipeline los descartaría:",
         fieldGeneric: "Término genérico (recibe menos peso)",
         fieldGenericHint:
           "Marca esto para términos amplios como “pesticidas” o “contaminantes orgánicos persistentes”.",
@@ -380,10 +399,12 @@ export const dictionaries = {
         profileConservative: "Conservador (más peso a métodos y resultados)",
         profileNeutral: "Neutral (todas las secciones igual)",
         profileCentralOnly: "Sólo secciones centrales",
+        sectionColumn: "Sección",
         weightColumn: "Peso",
         headersColumn: "Patrones de encabezado",
         headersHint:
           "Patrones regex para detectar dónde empieza cada sección. Uno por línea. Acepta banderas estilo (?im) al inicio.",
+        weightHint: "Número entero entre {min} y {max}.",
         names: {
           title: "Título",
           abstract: "Resumen / Abstract",
@@ -483,6 +504,14 @@ export const dictionaries = {
           "Hay términos de la variable A sin etiqueta o sin patrones regex.",
         "taxonomy.b_incomplete_term":
           "Hay términos de la variable B sin etiqueta o sin patrones regex.",
+        "taxonomy.a_invalid_pattern":
+          "Hay patrones de la variable A que no son expresiones regulares válidas: el pipeline los descartaría y esos términos quedarían fuera del léxico.",
+        "taxonomy.b_invalid_pattern":
+          "Hay patrones de la variable B que no son expresiones regulares válidas: el pipeline los descartaría y esos términos quedarían fuera del léxico.",
+        "taxonomy.a_unlabeled_category":
+          "Hay categorías de la variable A sin etiqueta: sus términos quedarían agrupados junto a los términos sin categoría.",
+        "taxonomy.b_unlabeled_category":
+          "Hay categorías de la variable B sin etiqueta: sus términos quedarían agrupados junto a los términos sin categoría.",
         "parameters.context_radius_out_of_range":
           "El radio de contexto debe estar dentro del rango permitido.",
         "parameters.kwic_radius_out_of_range":
@@ -492,7 +521,11 @@ export const dictionaries = {
         "parameters.k_out_of_range":
           "El número de clústeres K-Means debe estar dentro del rango permitido.",
         "parameters.sample_out_of_range":
-          "El tamaño de muestra de validación debe estar dentro del rango permitido."
+          "El tamaño de muestra de validación debe estar dentro del rango permitido.",
+        "sections.weight_invalid":
+          "Hay pesos de sección vacíos o que no son números enteros.",
+        "sections.weight_out_of_range":
+          "Hay pesos de sección fuera del rango permitido (de -10 a 10)."
       }
     },
     results: {
@@ -552,10 +585,13 @@ export const dictionaries = {
       runAction: "Ejecutar con este protocolo",
       loading_one: "Cargando protocolo...",
       loadOneError: "No pude leer este protocolo.",
-      loadedToast: "Protocolo cargado en el diseñador",
       authorPrefix: "Autor:",
       savedAtPrefix: "Guardado:",
       warningsTitle: "Avisos al cargar:",
+      warningMissingLabel: "Falta este archivo:",
+      warningInvalidLabel: "No pude leer este archivo:",
+      warningFallbackNote:
+        "El diseñador cargó los valores por defecto para esas piezas, pero el pipeline en Python no aplica ese respaldo: las trataría como listas vacías. Revísalas y vuelve a guardar el protocolo antes de ejecutarlo.",
       slugPrefix: "Carpeta:"
     },
     execute: {
@@ -566,7 +602,6 @@ export const dictionaries = {
       backToLoad: "Volver al listado",
       protocolHeaderEyebrow: "Protocolo activo",
       protocolHeaderEmpty: "(protocolo sin nombre)",
-      variableLabel: "Variable",
       termsCount: "{count} términos",
       termsCountSingular: "1 término",
       paramSummary: "Contexto {context} caracteres · Distancia A↔B {relation} caracteres · K-Means k={k}",
@@ -609,16 +644,26 @@ export const dictionaries = {
       stepStatusPending: "Pendiente",
       stepStatusRunning: "Ejecutando",
       stepStatusCompleted: "Listo",
-      stepStatusFailed: "Falló"
+      stepStatusFailed: "Falló",
+      pollRetrying:
+        "Perdí contacto con el servidor mientras seguía esta ejecución. Reintentando... ({attempt})",
+      pollLost:
+        "No pude recuperar el estado de esta ejecución. El pipeline puede seguir corriendo en tu máquina: revisa la carpeta de salida o vuelve a ejecutar."
     }
   },
   en: {
+    /**
+     * Language code of this dictionary. Client components receive `t` as a
+     * prop (not the cookie), so this key is their only way to know which
+     * locale they are rendering when formatting dates or picking a bilingual
+     * display name.
+     */
+    localeCode: "en",
     common: {
       brand: "NEXO",
       tagline: "Data mining for literature reviews.",
       back: "Back",
       next: "Next",
-      cancel: "Cancel",
       save: "Save",
       load: "Load",
       loading: "Loading...",
@@ -644,6 +689,9 @@ export const dictionaries = {
       ctaStart: "Start a review",
       ctaResults: "View existing results",
       heroImageAlt: "Real visualization generated by the pipeline",
+      sectionIndexMethod: "01 — Method",
+      sectionIndexPrivacy: "02 — Privacy",
+      sectionIndexOutputs: "03 — Outputs",
       methodEyebrow: "PRISMA + textual evidence",
       methodTitle: "From PDFs to auditable results",
       methodCopy:
@@ -809,7 +857,11 @@ export const dictionaries = {
       resetConfirm:
         "This will erase everything you have filled in the designer. Do you want to continue?",
       draftSaved: "Draft saved in your browser",
-      importJsonLabel: "Import JSON",
+      blockedTitle: "Earlier steps are incomplete:",
+      blockedSummaryTitle: "You cannot save this protocol yet",
+      blockedCopy:
+        "The pipeline cannot run with this configuration. Fix the steps listed below and come back here.",
+      blockedGoToStep: "Go to “{step}”",
       importJsonHint: "Load a compatible .json file (legacy or v2 format)",
       importError: "I could not read this file",
       importErrorInvalidJson: "The file is not valid JSON",
@@ -865,8 +917,12 @@ export const dictionaries = {
         variableB: "Variable B",
         fieldDisplayNameEs: "Name in Spanish",
         fieldDisplayNameEn: "Name in English",
-        fieldDisplayNamePlaceholderA: "e.g. Contaminants",
-        fieldDisplayNamePlaceholderB: "e.g. Diseases",
+        // One placeholder per field: the example is written in the language
+        // of the field, the lead-in ("e.g." / "Ej.") in the UI language.
+        fieldDisplayNamePlaceholderAEs: "e.g. Contaminantes",
+        fieldDisplayNamePlaceholderAEn: "e.g. Contaminants",
+        fieldDisplayNamePlaceholderBEs: "e.g. Enfermedades",
+        fieldDisplayNamePlaceholderBEn: "e.g. Diseases",
         fieldMode: "List structure",
         modeFlat: "Flat list",
         modeFlatHint: "Only term names, no categories. Ideal when items don't group hierarchically.",
@@ -895,6 +951,8 @@ export const dictionaries = {
         fieldPatterns: "Regex patterns (one per line)",
         fieldPatternsHint:
           "Patterns are evaluated case-insensitively. Use `\\b...\\b` to match whole words. e.g. `\\blead\\b`",
+        invalidPatternsLabel:
+          "These patterns are not valid regular expressions and the pipeline would drop them:",
         fieldGeneric: "Generic term (gets less weight)",
         fieldGenericHint:
           "Tick this for broad terms like “pesticides” or “persistent organic pollutants”.",
@@ -975,10 +1033,12 @@ export const dictionaries = {
         profileConservative: "Conservative (more weight on methods and results)",
         profileNeutral: "Neutral (every section equal)",
         profileCentralOnly: "Central sections only",
+        sectionColumn: "Section",
         weightColumn: "Weight",
         headersColumn: "Header patterns",
         headersHint:
           "Regex patterns to detect where each section starts. One per line. Supports (?im) flags at the start.",
+        weightHint: "Whole number between {min} and {max}.",
         names: {
           title: "Title",
           abstract: "Abstract",
@@ -1080,6 +1140,14 @@ export const dictionaries = {
           "Some Variable A terms have no label or no regex patterns.",
         "taxonomy.b_incomplete_term":
           "Some Variable B terms have no label or no regex patterns.",
+        "taxonomy.a_invalid_pattern":
+          "Some Variable A patterns are not valid regular expressions: the pipeline would drop them and leave those terms out of the lexicon.",
+        "taxonomy.b_invalid_pattern":
+          "Some Variable B patterns are not valid regular expressions: the pipeline would drop them and leave those terms out of the lexicon.",
+        "taxonomy.a_unlabeled_category":
+          "Some Variable A categories have no label: their terms would be pooled with the ungrouped ones.",
+        "taxonomy.b_unlabeled_category":
+          "Some Variable B categories have no label: their terms would be pooled with the ungrouped ones.",
         "parameters.context_radius_out_of_range":
           "The context radius must be inside the allowed range.",
         "parameters.kwic_radius_out_of_range":
@@ -1089,7 +1157,11 @@ export const dictionaries = {
         "parameters.k_out_of_range":
           "The K-Means cluster count must be inside the allowed range.",
         "parameters.sample_out_of_range":
-          "The validation sample size must be inside the allowed range."
+          "The validation sample size must be inside the allowed range.",
+        "sections.weight_invalid":
+          "Some section weights are empty or are not whole numbers.",
+        "sections.weight_out_of_range":
+          "Some section weights are outside the allowed range (-10 to 10)."
       }
     },
     results: {
@@ -1149,10 +1221,13 @@ export const dictionaries = {
       runAction: "Run with this protocol",
       loading_one: "Loading protocol...",
       loadOneError: "Could not read this protocol.",
-      loadedToast: "Protocol loaded into the designer",
       authorPrefix: "Author:",
       savedAtPrefix: "Saved:",
       warningsTitle: "Warnings on load:",
+      warningMissingLabel: "This file is missing:",
+      warningInvalidLabel: "I could not read this file:",
+      warningFallbackNote:
+        "The designer loaded the default values for those pieces, but the Python pipeline applies no such fallback: it would treat them as empty lists. Review them and save the protocol again before running it.",
       slugPrefix: "Folder:"
     },
     execute: {
@@ -1163,7 +1238,6 @@ export const dictionaries = {
       backToLoad: "Back to the list",
       protocolHeaderEyebrow: "Active protocol",
       protocolHeaderEmpty: "(unnamed protocol)",
-      variableLabel: "Variable",
       termsCount: "{count} terms",
       termsCountSingular: "1 term",
       paramSummary: "Context {context} characters · A↔B distance {relation} characters · K-Means k={k}",
@@ -1206,9 +1280,22 @@ export const dictionaries = {
       stepStatusPending: "Pending",
       stepStatusRunning: "Running",
       stepStatusCompleted: "Done",
-      stepStatusFailed: "Failed"
+      stepStatusFailed: "Failed",
+      pollRetrying:
+        "Lost contact with the server while following this run. Retrying... ({attempt})",
+      pollLost:
+        "Could not recover the state of this run. The pipeline may still be running on your machine: check the output folder or run it again."
     }
   }
 } as const;
 
 export type Dictionary = (typeof dictionaries)[Locale];
+
+/**
+ * Pick the display name that matches the active locale for a bilingual field
+ * the user authored (variable names, taxonomy labels). Only one of the two is
+ * required, so the other language is used as the fallback.
+ */
+export function pickLabel(locale: Locale, es: string, en: string): string {
+  return locale === "en" ? en || es : es || en;
+}

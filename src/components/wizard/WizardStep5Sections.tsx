@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useProtocolDraft } from "@/components/wizard/ProtocolDraftProvider";
 import { CueListEditor } from "@/components/wizard/CueListEditor";
 import { ValidationNotice } from "@/components/wizard/ValidationNotice";
@@ -13,6 +14,7 @@ import {
   type SectionId,
   type SectionProfileId
 } from "@/lib/protocol/types";
+import { SECTION_WEIGHT_BOUNDS } from "@/lib/protocol/validation";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 interface Props {
@@ -126,7 +128,7 @@ export function WizardStep5Sections({ t, errors }: Props) {
       <table className="section-weights-table">
         <thead>
           <tr>
-            <th scope="col">{t.wizard.sections.sectionTitle.split(":")[0]}</th>
+            <th scope="col">{t.wizard.sections.sectionColumn}</th>
             <th scope="col" style={{ width: 120 }}>
               {t.wizard.sections.weightColumn}
             </th>
@@ -151,14 +153,13 @@ export function WizardStep5Sections({ t, errors }: Props) {
                   {note ? <p className="help-text">{note}</p> : null}
                 </th>
                 <td>
-                  <input
-                    type="number"
+                  <SectionWeightInput
                     value={sections.weights[sectionId]}
-                    onChange={(e) =>
-                      updateWeight(sectionId, parseInt(e.target.value, 10) || 0)
-                    }
-                    step={1}
-                    className="section-weight-input"
+                    onCommit={(weight) => updateWeight(sectionId, weight)}
+                    label={t.wizard.sections.names[sectionId]}
+                    hint={t.wizard.sections.weightHint
+                      .replace("{min}", String(SECTION_WEIGHT_BOUNDS.min))
+                      .replace("{max}", String(SECTION_WEIGHT_BOUNDS.max))}
                   />
                 </td>
                 <td>
@@ -181,5 +182,56 @@ export function WizardStep5Sections({ t, errors }: Props) {
         </tbody>
       </table>
     </div>
+  );
+}
+
+/**
+ * Numeric editor for one section weight.
+ *
+ * The typed text lives in local state and is only committed to the draft
+ * when it parses to an integer: clearing the field (or typing a lone "-")
+ * used to write 0 into the draft on that keystroke, and 0 is a legitimate
+ * weight, so nothing downstream could tell the accident from an intent.
+ * The last committed value is restored on blur when the field is left
+ * unparseable.
+ */
+function SectionWeightInput({
+  value,
+  onCommit,
+  label,
+  hint
+}: {
+  value: number;
+  onCommit: (weight: number) => void;
+  label: string;
+  hint: string;
+}) {
+  const [text, setText] = useState(() => String(value));
+
+  // Follow the draft when the weight changes elsewhere (profile selector,
+  // import, reset), but never while the user is mid-edit on this field.
+  useEffect(() => {
+    setText((current) => (Number.parseInt(current, 10) === value ? current : String(value)));
+  }, [value]);
+
+  function onChange(raw: string) {
+    setText(raw);
+    const parsed = Number.parseInt(raw, 10);
+    if (Number.isInteger(parsed) && String(parsed) === raw.trim()) onCommit(parsed);
+  }
+
+  return (
+    <input
+      type="number"
+      value={text}
+      onChange={(e) => onChange(e.target.value)}
+      onBlur={() => setText(String(value))}
+      step={1}
+      min={SECTION_WEIGHT_BOUNDS.min}
+      max={SECTION_WEIGHT_BOUNDS.max}
+      className="section-weight-input"
+      aria-label={label}
+      title={hint}
+    />
   );
 }

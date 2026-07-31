@@ -1,7 +1,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { NextResponse } from "next/server";
-import { DEFAULT_PROTOCOLS_DIR, resolveUserPath } from "@/lib/server/project";
+import {
+  assertLocalProcessingAllowed,
+  assertProjectFile,
+  DEFAULT_PROTOCOLS_DIR,
+  resolveUserPath
+} from "@/lib/server/project";
 
 export const dynamic = "force-dynamic";
 
@@ -16,9 +21,13 @@ function safeFileName(value: string) {
 
 export async function POST(request: Request) {
   try {
+    assertLocalProcessingAllowed();
     const body = (await request.json()) as { path?: string; payload: unknown; defaultName?: string };
     const fallback = path.join(DEFAULT_PROTOCOLS_DIR, safeFileName(body.defaultName || "lexico_revision") + ".json");
     const filePath = resolveUserPath(body.path, fallback);
+    // Igual que /api/files/*: la ruta que elige el cliente debe quedar dentro
+    // del proyecto, si no cualquier pagina abierta podria escribir en el disco.
+    assertProjectFile(filePath);
     await fs.mkdir(path.dirname(filePath), { recursive: true });
     await fs.writeFile(filePath, JSON.stringify(body.payload, null, 2), "utf8");
     return NextResponse.json({ path: filePath });

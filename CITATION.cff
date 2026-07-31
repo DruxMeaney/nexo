@@ -1,0 +1,30 @@
+# Metadatos de citacion (Citation File Format 1.2.0).
+# Los campos marcados con "REVISAR" fueron inferidos del repositorio
+# (git config, package.json, README) y el autor debe confirmarlos o corregirlos.
+cff-version: 1.2.0
+message: "Si usas NEXO en un trabajo academico, por favor citalo asi."
+title: NEXO
+abstract: "Mineria de datos para revisiones. Interfaz web local-first que envuelve un pipeline Python generico para revision sistematica de literatura cientifica: toma cualquier par de variables definido como protocolo y produce menciones auditables, relaciones con evidencia textual, figuras, tablas y un reporte Word."
+type: software
+authors:
+  # REVISAR: nombre legal completo y afiliacion institucional.
+  # Inferidos de git config user.name ("Drux") y del usuario de GitHub "DruxMeaney".
+  - given-names: Drux
+    family-names: Meaney
+    affiliation: "Universidad Nacional Autonoma de Mexico, FES Iztacala"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"  # REVISAR: agregar ORCID real.
+repository-code: "https://github.com/DruxMeaney/nexo"
+url: "https://nexo-flame.vercel.app"
+license: MIT
+version: 0.1.0
+date-released: "2026-07-31"  # REVISAR: fecha de la version publicada.
+keywords:
+  - revision sistematica
+  - mineria de texto
+  - literatura cientifica
+  - reproducibilidad
+  - Python
+  - Next.js
+# REVISAR: si se acuña un DOI (Zenodo u otro) para el commit reportado,
+# agregarlo aqui como:
+# doi: "10.5281/zenodo.XXXXXXX"

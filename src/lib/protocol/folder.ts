@@ -2,10 +2,12 @@
  * Serialize a ProtocolDraft to a folder-shaped file map, and rebuild a draft
  * from that map.
  *
- * Folder layout (one JSON per concern, so users can swap individual pieces):
+ * Folder layout (one JSON per concern, so users can swap individual pieces).
+ * The layout is fixed: `review_miner/protocol.py` reads these exact paths, so
+ * protocol.json describes the run but never redirects the loader anywhere.
  *
  *   {slug}/
- *     protocol.json                 ← identity + analysis params + manifest
+ *     protocol.json                 ← identity + analysis params
  *     variables/
  *       variable_a.json             ← full v2 variable export
  *       variable_b.json
@@ -90,12 +92,6 @@ export interface ProtocolManifest {
   draftVersion: 1;
   identity: ProtocolDraft["identity"];
   analysis: ProtocolDraft["analysis"];
-  manifest: {
-    variableA: string;
-    variableB: string;
-    cues: Record<CueFamilyId, string>;
-    sections: string;
-  };
 }
 
 /* --------------------- Serializer --------------------- */
@@ -124,28 +120,18 @@ export function draftToFolder(draft: ProtocolDraft): Record<string, unknown> {
     headers: draft.sections.headers
   } satisfies Omit<SectionConfig, never> & Pick<SectionConfig, "activeProfile">;
 
+  // No file index here: the Python loader hardcodes the layout above, so an
+  // index inside protocol.json could only ever contradict what actually runs.
   const manifest: ProtocolManifest = {
     version: "1.0",
     savedAt: new Date().toISOString(),
     draftVersion: draft.draftVersion,
     identity: draft.identity,
-    analysis: draft.analysis,
-    manifest: {
-      variableA: "variables/variable_a.json",
-      variableB: "variables/variable_b.json",
-      cues: { ...CUE_FILENAMES, ...prefixCueFilenames(draft) },
-      sections: SECTIONS_FILE
-    }
+    analysis: draft.analysis
   };
   out[PROTOCOL_FILE] = manifest;
 
   return out;
-}
-
-function prefixCueFilenames(_draft: ProtocolDraft): Record<CueFamilyId, string> {
-  return Object.fromEntries(
-    CUE_FAMILY_IDS.map((family) => [family, `cues/${CUE_FILENAMES[family]}`])
-  ) as Record<CueFamilyId, string>;
 }
 
 /* --------------------- Deserializer --------------------- */
@@ -155,12 +141,22 @@ function prefixCueFilenames(_draft: ProtocolDraft): Record<CueFamilyId, string> 
  * back to defaults — so a user can ship a folder with only `variables/*` or
  * only `cues/*` if they want to import partial state.
  *
- * The function never throws: corrupt JSON for a single file is logged via
- * the returned warnings array, the file is ignored, and the rest is loaded.
+ * The function never throws: a missing or corrupt file is recorded in the
+ * returned warnings array, the file is ignored, and the rest is loaded. Every
+ * warning must be shown, because the fallback the wizard applies is not the
+ * one the pipeline applies.
  */
 export interface FolderLoadResult {
   draft: ProtocolDraft;
-  /** Names of files that could not be parsed; the corresponding slice fell back to defaults. */
+  /**
+   * Files the loader could not use, each prefixed with the reason:
+   *   `missing:cues/negation.json`  — the file is not in the folder
+   *   `invalid:cues/negation.json`  — the file is there but unusable
+   *
+   * In both cases that slice of the draft fell back to the defaults, which
+   * the Python pipeline does NOT do (a missing cue file leaves the family
+   * empty there), so every entry has to reach the user.
+   */
   warnings: string[];
 }
 
@@ -205,13 +201,15 @@ export function folderToDraft(files: Record<string, unknown>): FolderLoadResult 
 }
 
 function readProtocolFile(value: unknown, warnings: string[]): ProtocolManifest | null {
-  if (!value || typeof value !== "object") return null;
-  try {
-    return value as ProtocolManifest;
-  } catch {
-    warnings.push(PROTOCOL_FILE);
+  if (value === undefined) {
+    warnings.push(`missing:${PROTOCOL_FILE}`);
     return null;
   }
+  if (!value || typeof value !== "object") {
+    warnings.push(`invalid:${PROTOCOL_FILE}`);
+    return null;
+  }
+  return value as ProtocolManifest;
 }
 
 function readVariableFile(
@@ -219,18 +217,35 @@ function readVariableFile(
   warnings: string[],
   label: string
 ): ProtocolDraft["variableA"] | null {
-  if (!value || typeof value !== "object") return null;
+  const key = `variables/${label}.json`;
+  if (value === undefined) {
+    warnings.push(`missing:${key}`);
+    return null;
+  }
+  if (!value || typeof value !== "object") {
+    warnings.push(`invalid:${key}`);
+    return null;
+  }
   try {
     const json = JSON.stringify(value);
     return variableFromJson(json);
   } catch {
-    warnings.push(`variables/${label}.json`);
+    warnings.push(`invalid:${key}`);
     return null;
   }
 }
 
 function readCueFile(value: unknown, warnings: string[], key: string): string[] | null {
-  if (!value || typeof value !== "object") return null;
+  if (value === undefined) {
+    // The family is simply not in the folder. The wizard will show the
+    // default list for it, the pipeline would run with none — say so.
+    warnings.push(`missing:${key}`);
+    return null;
+  }
+  if (!value || typeof value !== "object") {
+    warnings.push(`invalid:${key}`);
+    return null;
+  }
   const candidate = value as { patterns?: unknown };
   if (Array.isArray(candidate.patterns)) {
     return candidate.patterns.filter((item): item is string => typeof item === "string");
@@ -238,21 +253,25 @@ function readCueFile(value: unknown, warnings: string[], key: string): string[] 
   if (Array.isArray(value)) {
     return (value as unknown[]).filter((item): item is string => typeof item === "string");
   }
-  warnings.push(key);
+  warnings.push(`invalid:${key}`);
   return null;
 }
 
 function readSectionsFile(value: unknown, warnings: string[]): Partial<SectionConfig> | null {
-  if (!value || typeof value !== "object") return null;
+  if (value === undefined) {
+    warnings.push(`missing:${SECTIONS_FILE}`);
+    return null;
+  }
+  if (!value || typeof value !== "object") {
+    warnings.push(`invalid:${SECTIONS_FILE}`);
+    return null;
+  }
   const candidate = value as Partial<SectionConfig>;
   // Trust the shape — the rehydrateDraft pass below will sanitize.
-  if (
-    candidate &&
-    (candidate.weights || candidate.headers || candidate.activeProfile)
-  ) {
+  if (candidate.weights || candidate.headers || candidate.activeProfile) {
     return candidate;
   }
-  warnings.push(SECTIONS_FILE);
+  warnings.push(`invalid:${SECTIONS_FILE}`);
   return null;
 }
 

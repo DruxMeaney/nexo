@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, Lock, RotateCcw, Save } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowRight, Check, Lock, RotateCcw, Save } from "lucide-react";
 import {
   ProtocolDraftProvider,
   useProtocolDraft
@@ -16,7 +16,8 @@ import { WizardStep7Summary } from "@/components/wizard/WizardStep7Summary";
 import { FirstVisitHint } from "@/components/wizard/FirstVisitHint";
 import {
   maxReachableStep,
-  validateAll
+  validateAll,
+  type StepValidation
 } from "@/lib/protocol/validation";
 import { WIZARD_STEPS, type WizardStepId } from "@/lib/protocol/types";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -56,7 +57,17 @@ function WizardShellInner({ t }: WizardShellProps) {
   const currentValidation = validations[currentStep];
   const isFirst = stepIndex === 0;
   const isLast = stepIndex === WIZARD_STEPS.length - 1;
-  const canGoNext = currentValidation.isValid && !isLast;
+  // Gate on cumulative validity, never on the current step alone: steps
+  // `cues` and `sections` used to let a broken step 0-2 through because their
+  // own validators pass, which is how an unusable protocol reached Save.
+  const canGoNext = !isLast && reachable >= stepIndex + 1;
+
+  // Earlier steps that are invalid right now. Non-empty means the draft
+  // cannot be saved, whatever step the user is standing on.
+  const blockingSteps = useMemo(
+    () => WIZARD_STEPS.filter((step, idx) => idx < stepIndex && !validations[step].isValid),
+    [validations, stepIndex]
+  );
 
   function goPrev() {
     setStepIndex((current) => Math.max(0, current - 1));
@@ -66,10 +77,9 @@ function WizardShellInner({ t }: WizardShellProps) {
     setStepIndex((current) => Math.min(WIZARD_STEPS.length - 1, current + 1));
   }
   function goTo(target: WizardStepId, targetIndex: number) {
-    // Always allow going back. Forward jumps are clamped to `reachable + 1`
-    // (you can jump to the next-after-last-valid, but not beyond).
-    const maxAllowed = Math.min(reachable + 1, WIZARD_STEPS.length - 1);
-    if (targetIndex <= stepIndex || targetIndex <= maxAllowed) {
+    // Always allow going back. Forward jumps stop at the first invalid step,
+    // so no jump can ever skip over a step that still has errors.
+    if (targetIndex <= stepIndex || targetIndex <= reachable) {
       setStepIndex(WIZARD_STEPS.indexOf(target));
     }
   }
@@ -102,8 +112,7 @@ function WizardShellInner({ t }: WizardShellProps) {
               : idx === stepIndex
               ? "current"
               : "todo";
-          const maxAllowed = Math.min(reachable + 1, WIZARD_STEPS.length - 1);
-          const locked = idx > stepIndex && idx > maxAllowed;
+          const locked = idx > stepIndex && idx > reachable;
           return (
             <li key={step} className={`wizard-progress-step wizard-progress-${status}`}>
               <button
@@ -145,20 +154,37 @@ function WizardShellInner({ t }: WizardShellProps) {
           <div className="panel" style={{ padding: 24, color: "var(--muted)" }}>
             {t.common.loading}
           </div>
-        ) : currentStep === "identity" ? (
-          <WizardStep1Identity t={t} errors={currentValidation.errors} />
-        ) : currentStep === "variables" ? (
-          <WizardStep2Variables t={t} errors={currentValidation.errors} />
-        ) : currentStep === "taxonomy" ? (
-          <WizardStep3Taxonomy t={t} errors={currentValidation.errors} />
-        ) : currentStep === "cues" ? (
-          <WizardStep4Cues t={t} errors={currentValidation.errors} />
-        ) : currentStep === "sections" ? (
-          <WizardStep5Sections t={t} errors={currentValidation.errors} />
-        ) : currentStep === "parameters" ? (
-          <WizardStep6Parameters t={t} errors={currentValidation.errors} />
         ) : (
-          <WizardStep7Summary t={t} errors={currentValidation.errors} />
+          <>
+            {blockingSteps.length > 0 ? (
+              <BlockedStepsNotice
+                t={t}
+                steps={blockingSteps}
+                validations={validations}
+                onGoTo={goTo}
+                isSummary={currentStep === "summary"}
+              />
+            ) : null}
+            {/* The summary is where the protocol gets saved, so it is hidden
+                entirely while an earlier step is invalid: the notice above
+                lists what to fix and links back to it. */}
+            {currentStep === "summary" && blockingSteps.length > 0 ? null : currentStep ===
+              "identity" ? (
+              <WizardStep1Identity t={t} errors={currentValidation.errors} />
+            ) : currentStep === "variables" ? (
+              <WizardStep2Variables t={t} errors={currentValidation.errors} />
+            ) : currentStep === "taxonomy" ? (
+              <WizardStep3Taxonomy t={t} errors={currentValidation.errors} />
+            ) : currentStep === "cues" ? (
+              <WizardStep4Cues t={t} errors={currentValidation.errors} />
+            ) : currentStep === "sections" ? (
+              <WizardStep5Sections t={t} errors={currentValidation.errors} />
+            ) : currentStep === "parameters" ? (
+              <WizardStep6Parameters t={t} errors={currentValidation.errors} />
+            ) : (
+              <WizardStep7Summary t={t} errors={currentValidation.errors} />
+            )}
+          </>
         )}
       </section>
 
@@ -196,6 +222,59 @@ function WizardShellInner({ t }: WizardShellProps) {
           </button>
         </div>
       </footer>
+    </div>
+  );
+}
+
+/**
+ * Lists the earlier steps that still have errors, with a button that jumps
+ * back to each one. Rendered whenever the user is standing on a step later
+ * than a broken one — which is possible by editing a step after having
+ * reached a later one.
+ */
+function BlockedStepsNotice({
+  t,
+  steps,
+  validations,
+  onGoTo,
+  isSummary
+}: {
+  t: Dictionary;
+  steps: WizardStepId[];
+  validations: Record<WizardStepId, StepValidation>;
+  onGoTo: (target: WizardStepId, targetIndex: number) => void;
+  isSummary: boolean;
+}) {
+  return (
+    <div className="validation-notice" role="alert">
+      <AlertTriangle size={18} aria-hidden="true" />
+      <div>
+        <strong>{isSummary ? t.wizard.blockedSummaryTitle : t.wizard.blockedTitle}</strong>
+        <p style={{ margin: "4px 0 0" }}>{t.wizard.blockedCopy}</p>
+        <ul>
+          {steps.map((step) => (
+            <li key={step}>
+              <strong>{t.wizard.steps[step]}</strong>
+              {" — "}
+              {validations[step].errors
+                .map(
+                  (code) =>
+                    t.validation.messages[
+                      code as keyof Dictionary["validation"]["messages"]
+                    ] ?? code
+                )
+                .join(" ")}{" "}
+              <button
+                type="button"
+                className="button-ghost"
+                onClick={() => onGoTo(step, WIZARD_STEPS.indexOf(step))}
+              >
+                {t.wizard.blockedGoToStep.replace("{step}", t.wizard.steps[step])}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

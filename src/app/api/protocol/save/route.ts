@@ -1,38 +1,20 @@
-import fs from "node:fs/promises";
-import path from "node:path";
+/**
+ * POST /api/protocol/save  —  retirada (alias: /api/protocols/save).
+ *
+ * Escribia el protocolo plano previo a la fase 4 como un archivo suelto dentro
+ * de `config/protocols/`, donde `load_protocol()` solo sabe leer carpetas: el
+ * archivo quedaba invisible en /api/protocol/list y nunca se podia ejecutar.
+ * Ademas aceptaba cualquier ruta absoluta, asi que era una primitiva de
+ * escritura sin contencion. La ruta soportada es /api/protocol/save-folder.
+ */
+
 import { NextResponse } from "next/server";
-import { DEFAULT_PROTOCOLS_DIR, resolveUserPath } from "@/lib/server/project";
 
 export const dynamic = "force-dynamic";
 
-function safeProtocolName(value: string) {
-  const cleaned = value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9_-]+/g, "_")
-    .replace(/^_+|_+$/g, "")
-    .toLowerCase();
-  return cleaned || "protocolo_revision";
-}
+const RETIRED_MESSAGE =
+  "Esta ruta fue reemplazada por POST /api/protocol/save-folder, que guarda el protocolo como carpeta en config/protocols/{slug} (unico formato que el pipeline puede ejecutar).";
 
-export async function POST(request: Request) {
-  try {
-    const body = (await request.json()) as { path?: string; protocol: { name?: string } & Record<string, unknown> };
-    const now = new Date().toISOString();
-    const protocol = {
-      ...body.protocol,
-      updatedAt: now,
-      createdAt: body.protocol.createdAt || now
-    };
-    const fallback = path.join(DEFAULT_PROTOCOLS_DIR, `${safeProtocolName(String(protocol.name || ""))}.json`);
-    const filePath = resolveUserPath(body.path, fallback);
-    await fs.mkdir(path.dirname(filePath), { recursive: true });
-    await fs.writeFile(filePath, JSON.stringify(protocol, null, 2), "utf8");
-    return NextResponse.json({ path: filePath, protocol });
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "No se pudo guardar el protocolo." },
-      { status: 400 }
-    );
-  }
+export async function POST() {
+  return NextResponse.json({ error: RETIRED_MESSAGE }, { status: 410 });
 }

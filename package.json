@@ -3,6 +3,26 @@
   "version": "0.1.0",
   "private": true,
   "description": "NEXO: Mineria de datos para revisiones. Web app local-first para revision sistematica de literatura cientifica.",
+  "license": "MIT",
+  "author": "Drux Meaney",
+  "homepage": "https://nexo-flame.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DruxMeaney/nexo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DruxMeaney/nexo/issues"
+  },
+  "keywords": [
+    "systematic-review",
+    "text-mining",
+    "scientific-literature",
+    "reproducibility",
+    "nextjs"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

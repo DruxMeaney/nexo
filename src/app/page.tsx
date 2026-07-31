@@ -60,7 +60,7 @@ export default async function Home() {
         <section id="metodo" className="section">
           <div className="section-heading">
             <div>
-              <span className="section-index">01 — Método</span>
+              <span className="section-index">{t.landing.sectionIndexMethod}</span>
               <p className="eyebrow dark">{t.landing.methodEyebrow}</p>
               <h2>{t.landing.methodTitle}</h2>
               <p>{t.landing.methodCopy}</p>
@@ -96,7 +96,7 @@ export default async function Home() {
         <section className="section">
           <div className="section-heading">
             <div>
-              <span className="section-index">02 — Privacidad</span>
+              <span className="section-index">{t.landing.sectionIndexPrivacy}</span>
               <p className="eyebrow dark">{t.landing.privacyEyebrow}</p>
               <h2>{t.landing.privacyTitle}</h2>
               <p>{t.landing.privacyCopy}</p>
@@ -124,7 +124,7 @@ export default async function Home() {
         <section className="section">
           <div className="section-heading">
             <div>
-              <span className="section-index">03 — Salidas</span>
+              <span className="section-index">{t.landing.sectionIndexOutputs}</span>
               <h2>{t.landing.outputsTitle}</h2>
               <p>{t.landing.outputsCopy}</p>
             </div>

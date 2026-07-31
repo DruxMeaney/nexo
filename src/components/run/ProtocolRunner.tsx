@@ -11,7 +11,7 @@ import {
   Loader2,
   Play
 } from "lucide-react";
-import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { pickLabel, type Dictionary } from "@/lib/i18n/dictionaries";
 import { pluralize } from "@/lib/i18n/format";
 import type { PipelineJob, PipelineStep } from "@/lib/types";
 
@@ -40,6 +40,9 @@ interface Props {
 }
 
 const POLL_INTERVAL_MS = 1500;
+/** Backoff cap and give-up threshold for a status endpoint that stops answering. */
+const POLL_MAX_INTERVAL_MS = 15000;
+const POLL_MAX_FAILURES = 8;
 
 /**
  * End-to-end runner for a saved protocol.
@@ -66,6 +69,9 @@ export function ProtocolRunner({ protocol, t }: Props) {
   const [job, setJob] = useState<PipelineJob | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  // Consecutive failed polls. Drives the backoff, the inline warning and the
+  // give-up message; reset to 0 by every successful poll.
+  const [pollFailures, setPollFailures] = useState(0);
   const pollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Stop polling when we unmount or when the job reaches a terminal state.
@@ -78,20 +84,29 @@ export function ProtocolRunner({ protocol, t }: Props) {
   useEffect(() => {
     if (!job) return;
     if (job.status === "completed" || job.status === "failed") return;
+    if (pollFailures >= POLL_MAX_FAILURES) return;
     if (pollTimer.current) clearTimeout(pollTimer.current);
+    // The effect depends on `pollFailures` as well as `job`, so a failed poll
+    // still schedules the next one: bumping the counter re-runs the effect.
+    // Exponential backoff keeps a restarted or busy server from being hammered.
+    const delay = Math.min(POLL_INTERVAL_MS * 2 ** pollFailures, POLL_MAX_INTERVAL_MS);
     pollTimer.current = setTimeout(async () => {
       try {
         const response = await fetch(`/api/pipeline/status?jobId=${job.id}`, {
           cache: "no-store"
         });
-        if (!response.ok) return;
+        if (!response.ok) {
+          setPollFailures((count) => count + 1);
+          return;
+        }
         const next = (await response.json()) as PipelineJob;
+        setPollFailures(0);
         setJob(next);
       } catch {
-        /* network blip — try again on next interval */
+        setPollFailures((count) => count + 1);
       }
-    }, POLL_INTERVAL_MS);
-  }, [job]);
+    }, delay);
+  }, [job, pollFailures]);
 
   async function pickFolder(target: "input" | "output") {
     setPickingFolder(target);
@@ -130,6 +145,7 @@ export function ProtocolRunner({ protocol, t }: Props) {
     }
     setSubmitting(true);
     setFormError(null);
+    setPollFailures(0);
     try {
       const response = await fetch("/api/pipeline/run-protocol", {
         method: "POST",
@@ -266,7 +282,7 @@ export function ProtocolRunner({ protocol, t }: Props) {
         </div>
       </form>
 
-      {job ? <RunStatus job={job} t={t} /> : null}
+      {job ? <RunStatus job={job} t={t} pollFailures={pollFailures} /> : null}
     </div>
   );
 }
@@ -276,8 +292,12 @@ export function ProtocolRunner({ protocol, t }: Props) {
 /* --------------------------------------------------------------------- */
 
 function ProtocolHeader({ protocol, t }: { protocol: ProtocolSummary; t: Dictionary }) {
-  const nameA = protocol.variableA.displayNameEs || protocol.variableA.displayNameEn || "A";
-  const nameB = protocol.variableB.displayNameEs || protocol.variableB.displayNameEn || "B";
+  const nameA =
+    pickLabel(t.localeCode, protocol.variableA.displayNameEs, protocol.variableA.displayNameEn) ||
+    "A";
+  const nameB =
+    pickLabel(t.localeCode, protocol.variableB.displayNameEs, protocol.variableB.displayNameEn) ||
+    "B";
   return (
     <section className="runner-header">
       <p className="eyebrow" style={{ color: "var(--teal-dark)" }}>
@@ -321,10 +341,29 @@ function ProtocolHeader({ protocol, t }: { protocol: ProtocolSummary; t: Diction
 /* Live status panel                                                     */
 /* --------------------------------------------------------------------- */
 
-function RunStatus({ job, t }: { job: PipelineJob; t: Dictionary }) {
+function RunStatus({
+  job,
+  t,
+  pollFailures
+}: {
+  job: PipelineJob;
+  t: Dictionary;
+  pollFailures: number;
+}) {
   const status = mapJobStatus(job.status, t);
+  const pollLost = pollFailures >= POLL_MAX_FAILURES;
   return (
     <section className="run-status" aria-live="polite">
+      {pollFailures > 0 ? (
+        <div className="notice notice-danger" role="alert">
+          <AlertTriangle size={16} aria-hidden="true" />
+          <p style={{ margin: 0 }}>
+            {pollLost
+              ? t.execute.pollLost
+              : t.execute.pollRetrying.replace("{attempt}", String(pollFailures))}
+          </p>
+        </div>
+      ) : null}
       <header className="run-status-header">
         <div>
           <h3 style={{ marginTop: 0, marginBottom: 6 }}>{t.execute.runStartedTitle}</h3>
@@ -359,7 +398,11 @@ function RunStatus({ job, t }: { job: PipelineJob; t: Dictionary }) {
             <div>
               <strong>{stepLabel(step, t)}</strong>
               <p className="muted" style={{ margin: 0 }}>
-                {step.detail || stepStatus(step, t)}
+                {/* The localised status always leads. The server-supplied
+                    detail carries run-specific data (paths, slugs) that the
+                    dictionary cannot hold, so it is appended when present. */}
+                {stepStatus(step, t)}
+                {step.detail ? ` · ${step.detail}` : null}
               </p>
             </div>
           </li>
