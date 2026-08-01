@@ -29,17 +29,29 @@ NEXO ("Mineria de datos para revisiones.") es una capa web local-first sobre el 
 
 - `GET /api/project`: configuracion del proyecto.
 - `POST /api/local/dialog`: dialogo nativo local para elegir carpetas o archivos.
-- `POST /api/lexicon/load`: carga bases JSON de terminos.
-- `POST /api/lexicon/save`: guarda bases JSON compatibles con `review_miner`.
-- `POST /api/protocols/load`: carga un protocolo reutilizable.
-- `POST /api/protocols/save`: guarda un protocolo reutilizable.
-- `POST /api/pipeline/scan`: escaneo de carpeta local.
-- `POST /api/pipeline/run`: inicia una ejecucion.
+- `GET /api/protocol/list`: lista los protocolos guardados en `config/protocols/`.
+- `POST /api/protocol/load-folder`: carga una carpeta de protocolo completa.
+- `POST /api/protocol/save-folder`: guarda el borrador como carpeta de protocolo.
+- `POST /api/pipeline/run-protocol`: inicia una ejecucion con un protocolo dado.
 - `GET /api/pipeline/status`: consulta estado y logs.
 - `GET /api/results`: lista tablas, figuras, reportes y paquetes.
 - `GET /api/files/view`: sirve imagenes generadas dentro del proyecto.
 - `GET /api/files/download`: descarga archivos generados.
 - `GET /api/files/table`: previsualiza CSV.
+
+Rutas retiradas (responden `410`): `/api/lexicon/{load,save}`, `/api/protocol/{load,save}`,
+`/api/protocols/{load,save}`, `/api/pipeline/{run,scan}`. Pertenecian al modelo
+anterior a la fase 5, cuando las dos variables estaban fijas en el codigo. Se
+retiraron en vez de solo protegerlas: sin llamadores, una primitiva local de
+lectura/escritura de disco es solo superficie de ataque.
+
+### Peticiones de otro sitio
+
+El backend corre en localhost con los privilegios de disco del usuario, asi que
+cualquier pagina abierta en su navegador puede lanzarle un `POST`. Toda ruta que
+muta estado llama a `assertSameOrigin` (`src/lib/server/request-origin.ts`), que
+usa las cabeceras Fetch Metadata. `npm run check:api` verifica que ninguna ruta
+mutante se quede sin esa guardia.
 
 ## Limitacion de navegador y Vercel
 

@@ -21,29 +21,36 @@ const REQUIRED_PYTHON_MODULES = ["pandas", "numpy", "pypdf", "openpyxl", "docx"]
 const MAX_JOBS = 50;
 const JOB_TTL_MS = 6 * 60 * 60 * 1000;
 
+// `label` y `detail` NO se muestran: la interfaz resuelve cada paso por su `id`
+// contra el diccionario del idioma activo (ProtocolRunner.stepLabel/stepDetail).
+// Se conservan como respaldo legible para quien consuma /api/pipeline/status
+// fuera de la app. El `detail` que sí llega a pantalla es el que setStep escribe
+// en tiempo de ejecucion, y solo puede contener DATOS de la corrida (rutas,
+// slugs, conteos): cualquier prosa que se cuele ahi aparecería en español
+// dentro de una interfaz en inglés.
 const STEP_TEMPLATE: PipelineStep[] = [
   {
     id: "validate",
     label: "Validacion del corpus",
-    detail: "Revisa carpeta, PDFs y rutas de salida.",
+    detail: "",
     status: "pending"
   },
   {
     id: "pipeline",
     label: "Mineria y analisis contextual",
-    detail: "Ejecuta el pipeline publicable de review_miner.",
+    detail: "",
     status: "pending"
   },
   {
     id: "report",
     label: "Reporte Word",
-    detail: "Crea un documento con resumen, metodo y referencias a figuras.",
+    detail: "",
     status: "pending"
   },
   {
     id: "package",
     label: "Paquete descargable",
-    detail: "Comprime tablas, figuras, JSON y reporte.",
+    detail: "",
     status: "pending"
   }
 ];
@@ -244,7 +251,8 @@ async function executeProtocolPipeline(job: PipelineJob, input: StartProtocolPip
       throw new Error("La carpeta de PDFs no es una carpeta.");
     }
     await fs.mkdir(job.outputDir, { recursive: true });
-    setStep(job, "validate", "completed", `Protocolo: ${job.protocolSlug} · Corpus: ${job.inputDir}`);
+    // Solo datos, sin prosa: el idioma de la interfaz lo pone el cliente.
+    setStep(job, "validate", "completed", `${job.protocolSlug} · ${job.inputDir}`);
     log(job, `Salida: ${job.outputDir}`);
 
     setStep(job, "pipeline", "running");

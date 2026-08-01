@@ -14,22 +14,5 @@
     "relationDistance": 900,
     "kmeansK": 2,
     "validationSampleSize": 10
-  },
-  "manifest": {
-    "variableA": "variables/variable_a.json",
-    "variableB": "variables/variable_b.json",
-    "cues": {
-      "exposure": "cues/exposure.json",
-      "dose": "cues/dose.json",
-      "association": "cues/association.json",
-      "strongAssociation": "cues/strong_association.json",
-      "speculative": "cues/speculative.json",
-      "negation": "cues/negation.json",
-      "review": "cues/review.json",
-      "human": "cues/human.json",
-      "inVivo": "cues/in_vivo.json",
-      "inVitro": "cues/in_vitro.json"
-    },
-    "sections": "sections.json"
   }
 }

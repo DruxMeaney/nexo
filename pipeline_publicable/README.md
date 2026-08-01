@@ -44,12 +44,12 @@ El pipeline genera dos niveles de resultados:
 2. Salidas extendidas en `outputs/review_miner_publication/publication_pipeline/`:
    - `kwic_concordance.csv`
    - `entity_frequency_summary.csv`
-   - `contaminant_article_term_counts.csv`
-   - `contaminant_article_term_per_10k_words.csv`
-   - `contaminant_article_term_tfidf.csv`
-   - `disease_article_term_counts.csv`
-   - `disease_article_term_per_10k_words.csv`
-   - `disease_article_term_tfidf.csv`
+   - `a_article_term_counts.csv`
+   - `a_article_term_per_10k_words.csv`
+   - `a_article_term_tfidf.csv`
+   - `b_article_term_counts.csv`
+   - `b_article_term_per_10k_words.csv`
+   - `b_article_term_tfidf.csv`
    - `cooccurrence_article_vs_evidence.csv`
    - `section_weight_rationale.csv`
    - `section_weight_sensitivity.csv`

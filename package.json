@@ -31,7 +31,8 @@
     "check:i18n": "node scripts/check-i18n-parity.mjs",
     "check:templates": "node scripts/check-templates.mjs",
     "check:paths": "node scripts/check-no-machine-paths.mjs",
-    "test": "npm run check && npm run check:i18n && npm run check:templates && npm run check:paths",
+    "check:api": "node scripts/check-api-guards.mjs",
+    "test": "npm run check && npm run check:i18n && npm run check:templates && npm run check:paths && npm run check:api",
     "test:py": "python3 -m pytest tests -q"
   },
   "dependencies": {

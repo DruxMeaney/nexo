@@ -67,6 +67,29 @@ def _line_bounds(text: str, position: int) -> tuple[int, int]:
     return start, len(text) if end < 0 else end
 
 
+def _is_typographically_marked(word: str, line: str) -> bool:
+    """True when the header word is set off the way a printed header is.
+
+    Length alone does not separate a header from prose. PDF extraction wraps
+    body text, and a wrapped line can easily be short *and* start with a
+    section word — ``"results showed that inflammation was severe"`` is 43
+    characters, well under :data:`MAX_HEADER_LINE_CHARS`, and would otherwise
+    open a ``results`` section that relabels the rest of the article and
+    raises its weight from 2 to 5.
+
+    Capitalisation is the signal that survives extraction: journals set
+    headers in title case or small caps, never in running lowercase. A
+    lowercase match is therefore accepted only when the word IS the line, with
+    nothing else on it — that admits the occasional journal printing a bare
+    ``abstract`` while still rejecting a wrapped clause that happens to end on
+    ``result.``, whose line carries a period the bare header never has.
+    """
+
+    if word[:1].isupper():
+        return True
+    return line.casefold() == word.casefold()
+
+
 def _is_run_in_header(text: str, match: re.Match[str]) -> bool:
     """True when the header word is followed by a separator, e.g. ``Discussion.``
 
@@ -103,6 +126,8 @@ def _header_line_start(text: str, match: re.Match[str]) -> int:
     line = text[line_start:line_end].strip()
     if not line:
         return -1
+    if not _is_typographically_marked(text[position : match.end()].strip(), line):
+        return -1  # running prose that merely begins with a header word
     if len(line) > MAX_HEADER_LINE_CHARS and not _is_run_in_header(text, match):
         return -1  # a body line that merely begins with a header word
     return line_start

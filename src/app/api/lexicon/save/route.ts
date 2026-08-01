@@ -1,40 +1,26 @@
-import fs from "node:fs/promises";
-import path from "node:path";
+/**
+ * POST /api/lexicon/save  —  retirada.
+ *
+ * Escribia un lexico plano `{contaminants, diseases}` heredado del modelo
+ * previo a la fase 5, cuando las dos variables estaban fijas en el codigo. El
+ * formato que el pipeline ejecuta hoy es la carpeta de protocolo
+ * (`variables/variable_a.json`, `variables/variable_b.json`), que escribe
+ * /api/protocol/save-folder.
+ *
+ * Se retira en vez de solo anadirle la guardia de origen: ningun componente la
+ * llamaba, y una primitiva de escritura sin llamadores es superficie de ataque
+ * pura. Contenia la ruta al proyecto con `assertProjectFile`, pero eso no
+ * impedia que una pagina de otro sitio sobrescribiera, desde el navegador del
+ * usuario, el `protocol.json` que el pipeline va a ejecutar.
+ */
+
 import { NextResponse } from "next/server";
-import {
-  assertLocalProcessingAllowed,
-  assertProjectFile,
-  DEFAULT_PROTOCOLS_DIR,
-  resolveUserPath
-} from "@/lib/server/project";
 
 export const dynamic = "force-dynamic";
 
-function safeFileName(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9_-]+/g, "_")
-    .replace(/^_+|_+$/g, "")
-    .toLowerCase();
-}
+const RETIRED_MESSAGE =
+  "Esta ruta fue retirada. Los terminos de cada variable se guardan con POST /api/protocol/save-folder, que escribe la carpeta de protocolo completa en config/protocols/{slug} (unico formato que el pipeline puede ejecutar).";
 
-export async function POST(request: Request) {
-  try {
-    assertLocalProcessingAllowed();
-    const body = (await request.json()) as { path?: string; payload: unknown; defaultName?: string };
-    const fallback = path.join(DEFAULT_PROTOCOLS_DIR, safeFileName(body.defaultName || "lexico_revision") + ".json");
-    const filePath = resolveUserPath(body.path, fallback);
-    // Igual que /api/files/*: la ruta que elige el cliente debe quedar dentro
-    // del proyecto, si no cualquier pagina abierta podria escribir en el disco.
-    assertProjectFile(filePath);
-    await fs.mkdir(path.dirname(filePath), { recursive: true });
-    await fs.writeFile(filePath, JSON.stringify(body.payload, null, 2), "utf8");
-    return NextResponse.json({ path: filePath });
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "No se pudo guardar el lexico JSON." },
-      { status: 400 }
-    );
-  }
+export async function POST() {
+  return NextResponse.json({ error: RETIRED_MESSAGE }, { status: 410 });
 }

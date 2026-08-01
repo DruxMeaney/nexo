@@ -13,7 +13,7 @@ Interfaz web local-first para revision sistematica de literatura cientifica. NEX
 - Lee una carpeta local con PDFs, TXT o MD.
 - Ejecuta `pipeline_publicable/run_pipeline_publicable.py`.
 - Permite construir o cargar un protocolo reutilizable.
-- Permite cargar o editar las dos bases JSON de terminos a relacionar.
+- Permite construir las dos variables a relacionar, jerarquicas o planas.
 - Genera tablas CSV, Excel y JSON.
 - Expone figuras SVG y visual analytics.
 - Genera un reporte Word con resumen ejecutivo, metodo y referencias a figuras.
@@ -24,13 +24,13 @@ Interfaz web local-first para revision sistematica de literatura cientifica. NEX
 ```text
 RevisionContaminantes/
   src/app/                 Web app Next.js
-  src/app/api/             APIs locales para escaneo, ejecucion y archivos
-  src/components/          Landing, analizador y visualizador
+  src/app/api/             APIs locales para protocolos, ejecucion y archivos
+  src/components/          Landing, asistente de protocolo, runner y visualizador
   src/lib/server/          Adaptadores entre Next.js y el pipeline Python
   scripts/                 Utilidades de reporte
   review_miner/            Pipeline auditable existente
   pipeline_publicable/     Pipeline extendido para revision sistematica
-  config/                  Lexicos de contaminantes y enfermedades
+  config/                  Lexicos heredados del estudio original
   config/protocols/        Protocolos reutilizables creados desde la app
 ```
 
@@ -66,13 +66,15 @@ El entorno virtual es necesario: en macOS y en muchas distribuciones Linux el Py
 
 `requirements-lock.txt` es un `pip freeze` del entorno de trabajo (pandas 3.0.5, numpy 2.5.1, pypdf 6.14.2, openpyxl 3.1.5, python-docx 1.2.0) verificado con CPython 3.14.6.
 
-### Scripts de figuras opcionales
+### Scripts heredados de figuras
 
-`generar_graficos_menciones.py` y `generar_diagrama_algoritmo_detallado.py` son utilidades auxiliares y son los unicos archivos que necesitan matplotlib. El pipeline principal no lo usa (sus figuras son SVG nativas). Si los vas a correr:
-
-```bash
-.venv/bin/python -m pip install "matplotlib>=3.8,<4"
-```
+`generar_graficos_menciones.py` y `generar_diagrama_algoritmo_detallado.py` son
+anteriores a la generalizacion A/B y estan atados al dominio de contaminantes:
+el primero filtra `entity_type == "contaminant"`, un valor que el pipeline ya no
+escribe, y ambos llevan categorias fijas en el codigo. **No forman parte del
+pipeline** y no hace falta correrlos: las figuras de frecuencia por variable se
+generan de forma nativa en `figures/*.svg`, sin matplotlib. Son los unicos
+archivos del repositorio que lo necesitan.
 
 ## Ejecucion local
 
@@ -95,7 +97,8 @@ Abre:
 http://localhost:3000
 ```
 
-La ruta `/analizador` permite validar una carpeta local y ejecutar el pipeline. Si no defines una salida, la app crea una carpeta nueva bajo:
+El recorrido es `/comenzar` → `/protocolo/nuevo` (o `/protocolo/cargar`) → `/ejecutar` →
+`/resultados`. Si no defines una carpeta de salida, la app crea una nueva bajo:
 
 ```text
 outputs/webapp_runs/
@@ -103,23 +106,31 @@ outputs/webapp_runs/
 
 ## Constructor de protocolo
 
-El analizador incluye una seccion para construir el corpus conceptual de la revision:
+`/protocolo/nuevo` es un asistente de siete pasos que construye el protocolo desde cero:
 
-- Variable A: por defecto contaminantes.
-- Variable B: por defecto enfermedades.
-- Cada variable puede tener tipo, subtipo y subsubtipo.
-- Cada termino se guarda con `id`, etiquetas ES/EN, categoria jerarquica, bandera `generic` y patrones regex.
-- Las bases se pueden cargar desde `config/review_miner_contaminants.json` y `config/review_miner_diseases.json`.
-- Tambien se pueden guardar nuevas bases JSON compatibles con el pipeline.
+- Las dos variables son genericas: A y B se nombran en el paso 2. Nada esta fijo en el
+  codigo, asi que sirven igual para contaminantes/enfermedades que para cualquier otro par.
+- Cada variable puede ser jerarquica (Contaminantes → Metales → Cadmio) o plana, para
+  cuando las clases no tienen subclases.
+- Cada termino se guarda con `id`, etiquetas ES/EN, categoria, bandera `generic` y patrones regex.
+- Cada seccion que genera datos —terminos, familias de cues, secciones IMRaD— tiene su
+  propio boton de importacion, para reutilizar piezas de un protocolo anterior sin
+  reescribirlo entero.
+- No se puede avanzar de paso con los campos minimos vacios: los que faltan se marcan en rojo.
 
-Los protocolos guardan:
+Un protocolo se guarda como CARPETA en `config/protocols/{slug}/`, que es el unico
+formato que el pipeline ejecuta:
 
-- rutas de corpus y salida;
-- rutas y contenido de las dos bases de terminos;
-- caracteres de contexto por mencion;
-- radio KWIC;
-- distancia maxima para relacion;
-- parametros de K-Means y validacion manual.
+```text
+protocol.json          identidad + parametros de analisis
+variables/variable_a.json
+variables/variable_b.json
+cues/*.json            las diez familias lexicas
+sections.json          encabezados y pesos por seccion
+```
+
+Los parametros que guarda: caracteres de contexto por mencion, distancia maxima para
+relacionar A con B, `k` de K-Means y tamano de la muestra de validacion manual.
 
 El boton con icono de carpeta usa un dialogo nativo del sistema operativo mediante el backend local. Esto solo funciona al ejecutar la app localmente.
 

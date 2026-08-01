@@ -7,47 +7,26 @@ import type {
   ResultsSummary,
   TablePreview
 } from "@/lib/types";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { assertReadablePath, DEFAULT_OUTPUT_DIR, resolveUserPath, toDisplayPath } from "./project";
 
 const FIGURE_EXTENSIONS = new Set([".svg", ".png", ".jpg", ".jpeg", ".webp"]);
 const TABLE_EXTENSIONS = new Set([".csv", ".xlsx", ".xls"]);
 
 /**
- * Descriptions of the files the pipeline writes.
+ * Captions for the files the pipeline writes come from the active dictionary
+ * (`t.results.fileDescriptions`), keyed by file stem.
+ *
+ * They used to be Spanish literals in this module, which meant an English UI
+ * showed Spanish captions under every figure and table — the one place the
+ * language toggle could not reach, because this code runs server-side in the
+ * `/api/results` handler rather than in a component.
  *
  * `{a}` and `{b}` are replaced with the display names of the protocol's two
- * variables (read from `review_miner_results.json`), so the captions describe
- * whatever pair the protocol declares instead of the old hardcoded
- * contaminant/disease domain. Outputs without a protocol block fall back to the
- * neutral "variable A" / "variable B" labels.
+ * variables (read from `review_miner_results.json`), so a caption describes
+ * whatever pair the protocol declares instead of a hardcoded domain. Outputs
+ * with no protocol block fall back to the dictionary's neutral labels.
  */
-const DESCRIPTIONS: Record<string, string> = {
-  articles: "Corpus procesado, metadatos extraidos y estado de extraccion de texto.",
-  mentions: "Menciones auditables de {a} y {b} con seccion, frase y contexto.",
-  entity_summaries: "Resumen por articulo y entidad, con rol, confianza y evidencia textual.",
-  relations: "Relaciones {a}-{b} sustentadas por proximidad textual.",
-  systematic_review_table: "Tabla consolidada para revision sistematica y auditoria manual.",
-  heatmap_asociaciones: "Matriz de categorias de {a} frente a categorias de {b}.",
-  tipo_estudio: "Distribucion del corpus por tipo de estudio inferido.",
-  nivel_asociacion: "Conteo de relaciones por nivel de asociacion textual.",
-  association_network: "Red exploratoria de pares {a}-{b} reportados.",
-  top_association_pairs: "Pares de asociacion mas frecuentes con evidencia cercana.",
-  category_association_heatmap: "Heatmap avanzado por categorias de {a} y {b}.",
-  association_by_section: "Relaciones distribuidas por seccion del articulo.",
-  cluster_sizes: "Tamanos de clusters del analisis exploratorio K-Means.",
-  kmeans_cluster_map: "Mapa K-Means para triage exploratorio de articulos.",
-  publication_pipeline_tables: "Libro Excel con tablas extendidas del pipeline publicable.",
-  review_miner_results: "Resultados principales del pipeline en formato Excel o JSON.",
-  reporte_revision_nexo: "Reporte Word con resumen ejecutivo, metodo y referencias a figuras."
-};
-
-const FALLBACK_DESCRIPTION = "Archivo generado por el pipeline de mineria y visualizacion.";
-const FREQUENCY_DESCRIPTION = "Frecuencia de deteccion de {v} en el corpus.";
-const BUBBLE_DESCRIPTION = "Burbujas de pares {a}-{b} por frecuencia y peso.";
-
-const DEFAULT_VARIABLE_A = "variable A";
-const DEFAULT_VARIABLE_B = "variable B";
-
 type VariableNames = { a: string; b: string };
 
 /**
@@ -65,16 +44,17 @@ function slugifyVariable(value: string) {
   return cleaned || "variable";
 }
 
-function variableNames(protocol?: ResultsProtocolInfo): VariableNames {
+function variableNames(t: Dictionary, protocol?: ResultsProtocolInfo): VariableNames {
   return {
-    a: protocol?.variableA?.trim() || DEFAULT_VARIABLE_A,
-    b: protocol?.variableB?.trim() || DEFAULT_VARIABLE_B
+    a: protocol?.variableA?.trim() || t.results.variableAFallback,
+    b: protocol?.variableB?.trim() || t.results.variableBFallback
   };
 }
 
-function fileDescription(filePath: string, names: VariableNames) {
+function fileDescription(filePath: string, names: VariableNames, t: Dictionary) {
   const stem = path.basename(filePath, path.extname(filePath));
-  const template = DESCRIPTIONS[stem] || dynamicDescription(stem, names);
+  const descriptions: Record<string, string> = t.results.fileDescriptions;
+  const template = descriptions[stem] || dynamicDescription(stem, names, t);
   return template.split("{a}").join(names.a).split("{b}").join(names.b);
 }
 
@@ -83,18 +63,21 @@ function fileDescription(filePath: string, names: VariableNames) {
  * variable) and `bubble_<slug_a>_<slug_b>.svg`. When both display names slugify
  * to the same value the Python side prefixes them with `a_` / `b_`.
  */
-function dynamicDescription(stem: string, names: VariableNames) {
+function dynamicDescription(stem: string, names: VariableNames, t: Dictionary) {
+  const frequency = t.results.fileDescriptionFrequency;
   let slugA = slugifyVariable(names.a);
   let slugB = slugifyVariable(names.b);
   if (slugA === slugB) {
     slugA = `a_${slugA}`;
     slugB = `b_${slugB}`;
   }
-  if (stem === `frecuencia_${slugA}`) return FREQUENCY_DESCRIPTION.split("{v}").join("{a}");
-  if (stem === `frecuencia_${slugB}`) return FREQUENCY_DESCRIPTION.split("{v}").join("{b}");
-  if (stem.startsWith("frecuencia_")) return FREQUENCY_DESCRIPTION.split("{v}").join("la variable");
-  if (stem.startsWith("bubble_")) return BUBBLE_DESCRIPTION;
-  return FALLBACK_DESCRIPTION;
+  if (stem === `frecuencia_${slugA}`) return frequency.split("{v}").join("{a}");
+  if (stem === `frecuencia_${slugB}`) return frequency.split("{v}").join("{b}");
+  if (stem.startsWith("frecuencia_")) {
+    return frequency.split("{v}").join(t.results.fileDescriptionVariableGeneric);
+  }
+  if (stem.startsWith("bubble_")) return t.results.fileDescriptionBubble;
+  return t.results.fileDescriptionFallback;
 }
 
 async function walkFiles(root: string): Promise<string[]> {
@@ -114,7 +97,12 @@ async function walkFiles(root: string): Promise<string[]> {
   return files.flat();
 }
 
-async function toResultFile(root: string, filePath: string, names: VariableNames): Promise<ResultFile> {
+async function toResultFile(
+  root: string,
+  filePath: string,
+  names: VariableNames,
+  t: Dictionary
+): Promise<ResultFile> {
   const stat = await fs.stat(filePath);
   const ext = path.extname(filePath).toLowerCase();
   let kind: ResultFile["kind"] = "other";
@@ -129,7 +117,7 @@ async function toResultFile(root: string, filePath: string, names: VariableNames
     relativePath: path.relative(root, filePath),
     size: stat.size,
     kind,
-    description: fileDescription(filePath, names)
+    description: fileDescription(filePath, names, t)
   };
 }
 
@@ -159,13 +147,13 @@ async function countExtractableArticles(filePath: string) {
   }
 }
 
-export async function summarizeResults(outputDir?: string | null): Promise<ResultsSummary> {
+export async function summarizeResults(outputDir: string | null | undefined, t: Dictionary): Promise<ResultsSummary> {
   const root = resolveUserPath(outputDir, DEFAULT_OUTPUT_DIR);
   assertReadablePath(root);
   const protocolInfo = await readProtocolInfo(root);
-  const names = variableNames(protocolInfo);
+  const names = variableNames(t, protocolInfo);
   const files = await walkFiles(root);
-  const resultFiles = await Promise.all(files.map((file) => toResultFile(root, file, names)));
+  const resultFiles = await Promise.all(files.map((file) => toResultFile(root, file, names, t)));
   const figures = resultFiles.filter((file) => file.kind === "figure").sort((a, b) => a.relativePath.localeCompare(b.relativePath));
   const tables = resultFiles.filter((file) => file.kind === "table").sort((a, b) => a.relativePath.localeCompare(b.relativePath));
   const reports = resultFiles.filter((file) => file.kind === "report").sort((a, b) => a.relativePath.localeCompare(b.relativePath));

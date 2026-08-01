@@ -57,6 +57,23 @@ def save_both(fig: plt.Figure, output_base: Path) -> None:
 
 def build_contaminant_mentions(mentions: pd.DataFrame) -> pd.DataFrame:
     contaminants = mentions[mentions["entity_type"].eq("contaminant")].copy()
+    if contaminants.empty:
+        # Este script es anterior a la generalizacion A/B: el pipeline escribia
+        # entity_type "contaminant"/"disease" y hoy escribe "a"/"b", con las
+        # categorias que declare el protocolo. El filtro de arriba y la paleta
+        # CATEGORY_COLORS quedaron atados a un dominio concreto, asi que sobre
+        # una corrida actual no casa ninguna fila. Antes eso producia una figura
+        # vacia sin decir nada; ahora lo dice.
+        found = sorted(mentions["entity_type"].dropna().unique())
+        raise SystemExit(
+            "generar_graficos_menciones.py es un script heredado del estudio de "
+            "contaminantes: filtra entity_type == 'contaminant', un valor que el "
+            f"pipeline ya no escribe (en este archivo hay: {found or 'ninguno'}).\n"
+            "El pipeline genera hoy las figuras de frecuencia por variable de forma "
+            "nativa en figures/*.svg, sin matplotlib. Si necesitas esta variante, "
+            "adapta el filtro a la ranura que te interese ('a' o 'b') y revisa "
+            "CATEGORY_COLORS, que nombra categorias de un protocolo especifico."
+        )
     grouped = (
         contaminants.groupby(["label_es", "category"], dropna=False)
         .agg(

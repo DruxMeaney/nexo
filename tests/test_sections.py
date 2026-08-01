@@ -138,6 +138,68 @@ def test_wrapped_body_line_does_not_open_a_section(article, protocol, line_start
     assert all(span.start != position for span in spans)
 
 
+# The length rule alone cannot reject these: every line is comfortably under
+# MAX_HEADER_LINE_CHARS. They are prose because of how they are SET, not how
+# long they are — which is what `_is_typographically_marked` judges.
+SHORT_FALSE_HEADERS = (
+    # A wrapped clause whose continuation happens to start on a section word.
+    ("results showed that inflammation was severe", "results"),
+    ("method used here follows Larsen et al.", "method"),
+    # A sentence that wraps so its final word lands alone on a line. The
+    # trailing period is what separates it from a bare lowercase header.
+    ("result.", "result"),
+)
+
+
+@pytest.mark.parametrize("line, word", SHORT_FALSE_HEADERS)
+def test_a_short_lowercase_line_does_not_open_a_section(protocol, line, word):
+    """Prose in lowercase stays prose, however short the line is.
+
+    This is the hole the length rule left open: at 43 characters,
+    ``"results showed that inflammation was severe"`` passes every
+    line-length test, so before this rule it opened a ``results`` section that
+    relabelled everything after it and lifted the section weight from 2 to 5 —
+    inflating the score of every mention in the rest of the article.
+    """
+
+    text = f"Discussion\n\nThe exposure model is described elsewhere. Our\n{line}\nCadmium rose.\n"
+    assert len(line) <= MAX_HEADER_LINE_CHARS  # the length rule cannot help here
+    assert line.startswith(word)
+
+    spans = detect_sections(text, protocol.sections)
+    assert [span.name for span in spans] == ["discussion"]
+    assert section_for_position(spans, text.index("Cadmium")) == "discussion"
+
+
+def test_a_bare_lowercase_header_still_opens_its_section(protocol):
+    """Rejecting lowercase prose must not reject a lowercase HEADER.
+
+    Some journals print ``abstract`` in lowercase. Alone on its line, with no
+    trailing punctuation, it is unambiguous — and it is exactly the case the
+    rule above must not swallow.
+    """
+
+    text = "abstract\n\nCadmium was measured in every sample of the cohort.\n"
+
+    spans = detect_sections(text, protocol.sections)
+    assert [span.name for span in spans] == ["abstract"]
+    assert section_for_position(spans, text.index("Cadmium")) == "abstract"
+
+
+def test_capitalised_headers_are_unaffected(protocol):
+    """The common case — and the run-in form — must keep working."""
+
+    plain = "Introduction\n\nSome framing text.\n\nResults\n\nCadmium levels rose sharply.\n"
+    spans = detect_sections(plain, protocol.sections)
+    assert [span.name for span in spans] == ["introduction", "results"]
+    assert section_for_position(spans, plain.index("Cadmium")) == "results"
+
+    run_in = "Methods\n\nWe measured samples.\n\nDiscussion. This study reveals that lead exposure correlates with decline.\n"
+    spans = detect_sections(run_in, protocol.sections)
+    assert [span.name for span in spans] == ["methods", "discussion"]
+    assert section_for_position(spans, run_in.index("lead")) == "discussion"
+
+
 def test_false_headers_do_not_change_the_span_sequence(article, protocol):
     """The article with two false headers still reads as a plain IMRaD paper."""
 

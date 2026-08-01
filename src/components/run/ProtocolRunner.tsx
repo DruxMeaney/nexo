@@ -398,11 +398,12 @@ function RunStatus({
             <div>
               <strong>{stepLabel(step, t)}</strong>
               <p className="muted" style={{ margin: 0 }}>
-                {/* The localised status always leads. The server-supplied
-                    detail carries run-specific data (paths, slugs) that the
-                    dictionary cannot hold, so it is appended when present. */}
+                {/* Everything shown here comes from the active dictionary. The
+                    server sends `detail` only once the step has data to report
+                    (paths, slugs), never prose — prose from the server would
+                    render in Spanish inside an English interface. */}
                 {stepStatus(step, t)}
-                {step.detail ? ` · ${step.detail}` : null}
+                {` · ${step.detail || stepDetail(step, t)}`}
               </p>
             </div>
           </li>
@@ -481,6 +482,21 @@ function stepLabel(step: PipelineStep, t: Dictionary): string {
       return t.execute.stepPackageLabel;
     default:
       return step.label;
+  }
+}
+
+function stepDetail(step: PipelineStep, t: Dictionary): string {
+  switch (step.id) {
+    case "validate":
+      return t.execute.stepValidateDetail;
+    case "pipeline":
+      return t.execute.stepPipelineDetail;
+    case "report":
+      return t.execute.stepReportDetail;
+    case "package":
+      return t.execute.stepPackageDetail;
+    default:
+      return step.detail;
   }
 }
 

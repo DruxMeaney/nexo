@@ -1,29 +1,24 @@
-import fs from "node:fs/promises";
+/**
+ * POST /api/lexicon/load  —  retirada.
+ *
+ * Leia el lexico plano `{contaminants, diseases}` previo a la fase 5, cuando
+ * las dos variables estaban fijas en el codigo; sus presets `contaminants` y
+ * `diseases` ya no describen ningun protocolo generico. La carga se hace hoy
+ * con POST /api/protocol/load-folder, y cada seccion del asistente tiene
+ * ademas su propio boton de importacion.
+ *
+ * Se retira en vez de solo anadirle la guardia de origen: no tenia llamadores,
+ * y sin ella cualquier pagina abierta en el navegador podia leer y exfiltrar el
+ * contenido de los archivos JSON del proyecto.
+ */
+
 import { NextResponse } from "next/server";
-import {
-  assertLocalProcessingAllowed,
-  assertProjectFile,
-  DEFAULT_CONTAMINANTS,
-  DEFAULT_DISEASES,
-  resolveUserPath
-} from "@/lib/server/project";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(request: Request) {
-  try {
-    assertLocalProcessingAllowed();
-    const body = (await request.json()) as { path?: string; preset?: "contaminants" | "diseases" };
-    const fallback = body.preset === "diseases" ? DEFAULT_DISEASES : DEFAULT_CONTAMINANTS;
-    const filePath = resolveUserPath(body.path, fallback);
-    // Igual que /api/files/*: solo se leen archivos del proyecto local.
-    assertProjectFile(filePath);
-    const payload = JSON.parse(await fs.readFile(filePath, "utf8"));
-    return NextResponse.json({ path: filePath, payload });
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "No se pudo cargar el lexico JSON." },
-      { status: 400 }
-    );
-  }
+const RETIRED_MESSAGE =
+  "Esta ruta fue retirada. Un protocolo guardado se carga con POST /api/protocol/load-folder; las piezas sueltas (terminos, cues, secciones) se importan desde el asistente.";
+
+export async function POST() {
+  return NextResponse.json({ error: RETIRED_MESSAGE }, { status: 410 });
 }
