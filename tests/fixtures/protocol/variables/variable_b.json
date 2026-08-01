@@ -1,0 +1,47 @@
+{
+  "version": "2.0",
+  "metadata": {
+    "displayNameEs": "Enfermedades neurodegenerativas",
+    "displayNameEn": "Neurodegenerative diseases",
+    "mode": "hierarchical"
+  },
+  "taxonomy": [
+    {
+      "id": "alzheimer",
+      "kind": "category",
+      "labelEs": "Alzheimer",
+      "labelEn": "Alzheimer",
+      "children": [
+        {
+          "id": "alzheimers_disease",
+          "kind": "term",
+          "labelEs": "Alzheimer",
+          "labelEn": "Alzheimer's disease",
+          "patterns": [
+            "\\balzheimer'?s?\\b"
+          ],
+          "generic": false
+        }
+      ]
+    },
+    {
+      "id": "parkinson",
+      "kind": "category",
+      "labelEs": "Parkinson",
+      "labelEn": "Parkinson",
+      "children": [
+        {
+          "id": "parkinsons_disease",
+          "kind": "term",
+          "labelEs": "Parkinson",
+          "labelEn": "Parkinson's disease",
+          "patterns": [
+            "\\bparkinson'?s?\\b",
+            "\\bparkinsonismo\\b"
+          ],
+          "generic": false
+        }
+      ]
+    }
+  ]
+}

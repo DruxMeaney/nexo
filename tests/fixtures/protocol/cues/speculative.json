@@ -1,0 +1,7 @@
+{
+  "id": "speculative",
+  "patterns": [
+    "\\b(may|might|could|suggests?|potential)\\b",
+    "\\b(podr[ií]a|podr[ií]an|sugiere|sugieren|posible)\\b"
+  ]
+}

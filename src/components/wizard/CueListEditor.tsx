@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { RotateCcw, Upload } from "lucide-react";
+import { CheckCircle2, RotateCcw, Upload } from "lucide-react";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 interface Props {
@@ -29,6 +29,10 @@ interface Props {
  *
  * Empty trimmed lines are filtered out on change, so the user can blank the
  * field to disable the family.
+ *
+ * An import replaces the whole list, so a successful one reports how many
+ * patterns it loaded: without that confirmation the user cannot tell a good
+ * import from a file that simply did nothing.
  */
 export function CueListEditor({
   title,
@@ -40,6 +44,7 @@ export function CueListEditor({
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [importedCount, setImportedCount] = useState<number | null>(null);
 
   function applyText(raw: string) {
     const lines = raw
@@ -52,10 +57,12 @@ export function CueListEditor({
   function onReset() {
     onChange([...defaults]);
     setImportError(null);
+    setImportedCount(null);
   }
 
   function onImportClick() {
     setImportError(null);
+    setImportedCount(null);
     fileInputRef.current?.click();
   }
 
@@ -72,8 +79,10 @@ export function CueListEditor({
         return;
       }
       onChange(patterns);
+      setImportedCount(patterns.length);
     } catch {
       setImportError(t.wizard.importErrorInvalidJson);
+      setImportedCount(null);
     }
   }
 
@@ -128,6 +137,16 @@ export function CueListEditor({
       ) : null}
       {importError ? (
         <p className="cue-list-warning is-error">{importError}</p>
+      ) : null}
+      {importedCount !== null ? (
+        <p
+          className="help-text"
+          role="status"
+          style={{ margin: 0, display: "flex", alignItems: "center", gap: 6 }}
+        >
+          <CheckCircle2 size={14} color="var(--olive)" aria-hidden="true" />
+          {t.wizard.importSuccess} ({importedCount})
+        </p>
       ) : null}
     </div>
   );

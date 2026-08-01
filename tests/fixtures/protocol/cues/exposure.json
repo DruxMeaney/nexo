@@ -1,0 +1,8 @@
+{
+  "id": "exposure",
+  "patterns": [
+    "\\b(exposed|exposure|expuestos?|exposici[oó]n)\\b",
+    "\\b(dose|doses|dosis|concentrations?|concentraci[oó]n|concentraciones|levels?|niveles)\\b",
+    "\\b(treated|treatment|tratad[oa]s?|measured|medid[oa]s?)\\b"
+  ]
+}

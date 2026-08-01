@@ -8,7 +8,7 @@ import { ValidationNotice } from "@/components/wizard/ValidationNotice";
 import { countCategories, countTerms } from "@/lib/protocol/draft";
 import { slugifyName } from "@/lib/protocol/folder";
 import type { CueFamilyId } from "@/lib/protocol/types";
-import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { pickLabel, type Dictionary } from "@/lib/i18n/dictionaries";
 import { pluralize } from "@/lib/i18n/format";
 
 interface Props {
@@ -337,7 +337,9 @@ function VariableSummaryRow({
   terms: number;
   t: Dictionary;
 }) {
-  const label = displayNameEs || displayNameEn || "—";
+  // Solo uno de los dos nombres es obligatorio: se muestra el del idioma
+  // activo y, si está vacío, el del otro idioma.
+  const label = pickLabel(t.localeCode, displayNameEs, displayNameEn) || "—";
   return (
     <div className="summary-variable-row">
       <span className="variable-slot-badge">{slot}</span>

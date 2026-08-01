@@ -25,13 +25,13 @@ Un conteo simple de palabras no basta, porque un articulo puede mencionar "paraq
 ## Como correrlo
 
 ```bash
-/Users/drux/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 analisis_contexto_contaminantes.py
+python3 analisis_contexto_contaminantes.py
 ```
 
 Con parametros explicitos:
 
 ```bash
-/Users/drux/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 analisis_contexto_contaminantes.py \
+python3 analisis_contexto_contaminantes.py \
   --pdf-dir Articulos \
   --lexicon contaminantes_lexico.json \
   --metadata-xlsx "ArticulosTotales.xlsx,Base de articulos completa.xlsx" \

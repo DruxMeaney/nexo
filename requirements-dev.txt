@@ -1,0 +1,22 @@
+# Dependencias Python SOLO para correr las pruebas.
+#
+# Se mantienen aparte de requirements_review_miner.txt (que es el conjunto de
+# ejecucion del pipeline) para que nadie tenga que instalar un marco de pruebas
+# para usar la herramienta, y para que la suite no pueda introducir por accidente
+# una dependencia de ejecucion.
+#
+# Instalacion:
+#   python3 -m pip install -r requirements_review_miner.txt
+#   python3 -m pip install -r requirements-dev.txt
+#   python3 -m pytest tests -q
+#
+# La version va fijada (==) y no en rango: el valor de la suite es detectar que
+# un cambio de dependencia altero un peso, un umbral o una columna exportada, y
+# eso solo se distingue del ruido si el propio corredor de pruebas no se mueve.
+# Requiere Python 3.12 o superior, igual que requirements-lock.txt.
+pytest==9.1.1
+
+# Nada mas. La suite usa unicamente la biblioteca estandar y las dependencias
+# de ejecucion que ya declara requirements_review_miner.txt (pandas, numpy,
+# pypdf, openpyxl, python-docx). Si alguna prueba llega a necesitar un paquete
+# adicional, va aqui y no en el archivo de ejecucion.

@@ -21,8 +21,13 @@ def sentence_at(text: str, start: int, end: int, radius: int = 900) -> str:
 
     The boundary regex consumes ``\\s+`` — one to N whitespace characters —
     so the sentence offsets come from ``finditer`` and not from assuming a
-    single-character separator: a blank line between paragraphs would
-    otherwise shift every following sentence and return the wrong one.
+    single-character separator: a blank line between paragraphs (or the
+    ``\\f`` page break `io.extract_pdf` writes) would otherwise shift every
+    following sentence and return the wrong one. Because the offsets are
+    exact, the returned sentence is the one that really spans ``start`` —
+    which matters because it is exported as ``Mention.sentence`` and quoted
+    as relation evidence. A ``start`` that lands inside a separator belongs
+    to the sentence that follows it.
     """
 
     left = max(0, start - radius)

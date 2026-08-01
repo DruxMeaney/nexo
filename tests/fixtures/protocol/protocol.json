@@ -1,0 +1,35 @@
+{
+  "version": "1.0",
+  "savedAt": "2026-01-01T00:00:00Z",
+  "draftVersion": 1,
+  "identity": {
+    "name": "Protocolo de prueba: metales y enfermedades neurodegenerativas",
+    "description": "Protocolo minimo usado solo por la suite de pruebas. Contiene los terminos justos para ejercitar secciones, roles y relaciones sin depender del protocolo de ejemplo que se distribuye con la herramienta.",
+    "author": "NEXO — suite de pruebas",
+    "corpusLanguage": "bilingual"
+  },
+  "analysis": {
+    "contextRadius": 260,
+    "kwicRadius": 160,
+    "relationDistance": 900,
+    "kmeansK": 2,
+    "validationSampleSize": 10
+  },
+  "manifest": {
+    "variableA": "variables/variable_a.json",
+    "variableB": "variables/variable_b.json",
+    "cues": {
+      "exposure": "cues/exposure.json",
+      "dose": "cues/dose.json",
+      "association": "cues/association.json",
+      "strongAssociation": "cues/strong_association.json",
+      "speculative": "cues/speculative.json",
+      "negation": "cues/negation.json",
+      "review": "cues/review.json",
+      "human": "cues/human.json",
+      "inVivo": "cues/in_vivo.json",
+      "inVitro": "cues/in_vitro.json"
+    },
+    "sections": "sections.json"
+  }
+}

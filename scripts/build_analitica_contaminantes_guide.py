@@ -7,7 +7,9 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
 
-ROOT = Path("/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes")
+# Raiz del repositorio, deducida de la ubicacion de este script: el guion
+# debe correr en cualquier clon, no solo en la maquina del autor.
+ROOT = Path(__file__).resolve().parent.parent
 SLIDE_DIR = ROOT / "outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides"
 DOCS_DIR = ROOT / "docs"
 GUIDES_DIR = ROOT / "outputs/guias"

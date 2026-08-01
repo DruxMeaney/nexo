@@ -20,7 +20,7 @@ const LOG_LINES = [
 ];
 
 function Runner({ go }) {
-  const [inputDir, setInputDir] = React.useState("/Users/lab/Articulos");
+  const [inputDir, setInputDir] = React.useState("/Users/.../Articulos");
   const [outputDir, setOutputDir] = React.useState("");
   const [status, setStatus] = React.useState("idle"); // idle | running | completed
   const [stepIndex, setStepIndex] = React.useState(-1);

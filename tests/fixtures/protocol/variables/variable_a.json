@@ -1,0 +1,70 @@
+{
+  "version": "2.0",
+  "metadata": {
+    "displayNameEs": "Contaminantes",
+    "displayNameEn": "Contaminants",
+    "mode": "hierarchical"
+  },
+  "taxonomy": [
+    {
+      "id": "metales_pesados",
+      "kind": "category",
+      "labelEs": "Metales pesados",
+      "labelEn": "Heavy metals",
+      "children": [
+        {
+          "id": "lead",
+          "kind": "term",
+          "labelEs": "plomo",
+          "labelEn": "lead",
+          "patterns": [
+            "\\bplomo\\b",
+            "\\blead\\b"
+          ],
+          "generic": false
+        },
+        {
+          "id": "arsenic",
+          "kind": "term",
+          "labelEs": "arsenico",
+          "labelEn": "arsenic",
+          "patterns": [
+            "\\bars[eé]nico\\b",
+            "\\barsenic\\b"
+          ],
+          "generic": false
+        },
+        {
+          "id": "cadmium",
+          "kind": "term",
+          "labelEs": "cadmio",
+          "labelEn": "cadmium",
+          "patterns": [
+            "\\bcadmio\\b",
+            "\\bcadmium\\b"
+          ],
+          "generic": false
+        }
+      ]
+    },
+    {
+      "id": "termino_generico",
+      "kind": "category",
+      "labelEs": "Terminos genericos",
+      "labelEn": "Generic terms",
+      "children": [
+        {
+          "id": "generic_pollutant",
+          "kind": "term",
+          "labelEs": "contaminante ambiental",
+          "labelEn": "environmental pollutant",
+          "patterns": [
+            "\\bcontaminantes?\\s+ambientales?\\b",
+            "\\benvironmental\\s+pollutants?\\b"
+          ],
+          "generic": true
+        }
+      ]
+    }
+  ]
+}

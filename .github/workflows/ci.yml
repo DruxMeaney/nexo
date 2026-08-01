@@ -1,0 +1,73 @@
+# Integracion continua de NEXO.
+#
+# Dos trabajos independientes porque son dos artefactos independientes: la app
+# web (TypeScript/Next.js) y el pipeline de mineria (Python). Se corren en
+# paralelo para que un fallo en uno no oculte el estado del otro.
+#
+# Sin cache de dependencias a proposito. Una cache de node_modules o de pip
+# puede enmascarar un package-lock.json roto o un requirements desactualizado
+# —justo lo que la instalacion limpia debe detectar— y este repositorio se
+# publica con una promesa de reproducibilidad desde cero.
+
+name: CI
+
+# `on` va entrecomillado: en YAML 1.1 `on` sin comillas se interpreta como el
+# booleano `true`, y aunque GitHub lo resuelve bien, cualquier otro analizador
+# (o linter) leeria la clave equivocada.
+"on":
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Web (Node 24)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      # `npm ci` (y no `npm install`) para que el lockfile sea vinculante:
+      # falla si package.json y package-lock.json divergen.
+      - name: Instalar dependencias
+        run: npm ci
+
+      # Se ejecuta por separado ademas de dentro de `npm test` para que un
+      # error de tipos se distinga a simple vista de un fallo de los chequeos.
+      - name: Comprobacion de tipos
+        run: npm run check
+
+      # Paridad de diccionarios + higiene de patrones de las plantillas +
+      # ausencia de rutas absolutas de maquina.
+      - name: Chequeos
+        run: npm test
+
+  pipeline:
+    name: Pipeline (Python 3.12)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements_review_miner.txt
+          python -m pip install -r requirements-dev.txt
+
+      # La suite corre sobre el corpus de prueba versionado en tests/; no
+      # descarga nada ni depende del corpus privado del autor.
+      - name: Pruebas del pipeline
+        run: python -m pytest tests -q

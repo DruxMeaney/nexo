@@ -1,0 +1,7 @@
+{
+  "id": "inVivo",
+  "patterns": [
+    "\\b(in\\s+vivo|mice|rats?|murine|zebrafish)\\b",
+    "\\b(rat[oó]n|ratas?|pez\\s+cebra|modelo\\s+animal)\\b"
+  ]
+}

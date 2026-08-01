@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from .export import pin_workbook_timestamps
 from .protocol import Protocol, SectionConfig
 from .schema import Article, EntitySummary, Mention, Relation
 from .sections import section_weight
@@ -759,6 +760,9 @@ def export_publication_extensions(
     with pd.ExcelWriter(excel_path, engine="openpyxl") as writer:
         for name, dataframe in tables.items():
             dataframe.to_excel(writer, sheet_name=name[:31], index=False)
+    # Same reproducibility contract as the main workbook — see the note above
+    # `pin_workbook_timestamps` in `export`.
+    pin_workbook_timestamps(excel_path)
     paths["excel"] = excel_path
 
     summary = {

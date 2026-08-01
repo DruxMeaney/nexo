@@ -1,0 +1,7 @@
+{
+  "id": "human",
+  "patterns": [
+    "\\b(cohort|patients?|participants?|population)\\b",
+    "\\b(cohorte|pacientes?|participantes?|poblaci[oó]n)\\b"
+  ]
+}

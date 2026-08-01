@@ -30,7 +30,8 @@ Importante: si los clusters salen desbalanceados, eso no es necesariamente un er
 ## Como ejecutar
 
 ```bash
-/Users/drux/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 run_visual_analytics.py \
+python3 -m review_miner.visual_analytics \
+  --protocol config/protocols/contaminantes-enfermedades-neurodegenerativas \
   --input-dir outputs/review_miner \
   --output-dir outputs/review_miner/visual_analytics \
   --k 4

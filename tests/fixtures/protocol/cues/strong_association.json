@@ -1,0 +1,7 @@
+{
+  "id": "strongAssociation",
+  "patterns": [
+    "\\b(significantly|increased\\s+risk|odds\\s+ratio|hazard\\s+ratio)\\b",
+    "\\b(significativamente|mayor\\s+riesgo|raz[oó]n\\s+de\\s+momios)\\b"
+  ]
+}

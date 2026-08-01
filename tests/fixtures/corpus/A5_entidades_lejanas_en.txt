@@ -1,0 +1,28 @@
+Trace metal monitoring in rural drinking water supplies of the northern basin
+
+Abstract
+Water samples were collected in twenty four villages during two dry seasons in order to
+describe the seasonal variation of trace elements in shallow wells and to document the
+sampling protocol used by the regional laboratory.
+
+Introduction
+Cadmium was detected above the guideline value in six of the sampled wells.
+The regional laboratory has operated since 1998 and takes part in an annual
+inter-laboratory comparison scheme organised by the national reference centre. Each
+village was visited twice, once at the end of the dry season and once after the first
+rains, so that the seasonal contrast could be quantified with paired measurements. Field
+blanks were prepared on site with ultrapure water and travelled with the samples in the
+same cooler. Every well was georeferenced with a handheld receiver and its depth was
+recorded from the drilling report kept by the municipal authority. The questionnaire
+applied to the households covered the daily volume of water drawn from the well, the use
+of any domestic filter, and whether the household also purchased bottled water during
+part of the year. Analytical quality was monitored with certified reference material
+inserted in every batch of twenty samples, and a batch was repeated whenever the
+recovery fell outside the interval of eighty five to one hundred and fifteen per cent.
+The whole dataset was archived in the open repository of the regional authority together
+with the field notebooks and the chain of custody forms.
+
+Discussion
+The neurological consequences of chronic trace element intake remain debated in the
+literature. Parkinson disease incidence in the basin has not been characterised by any
+registry, so no comparison with the exposure map could be attempted here.

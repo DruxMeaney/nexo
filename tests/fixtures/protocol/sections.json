@@ -1,0 +1,41 @@
+{
+  "activeProfile": "baseline_current",
+  "weights": {
+    "title": 5,
+    "abstract": 4,
+    "methods": 6,
+    "results": 5,
+    "discussion": 2,
+    "conclusion": 2,
+    "introduction": 1,
+    "references": -3,
+    "other": 1
+  },
+  "headers": {
+    "title": [],
+    "abstract": [
+      "(?im)^\\s*(abstract|resumen)\\b"
+    ],
+    "introduction": [
+      "(?im)^\\s*(\\d+[\\.\\)]?\\s*)?(introduction|introducci[oó]n|background|antecedentes)\\b"
+    ],
+    "methods": [
+      "(?im)^\\s*(\\d+[\\.\\)]?\\s*)?((materials?\\s+and\\s+methods?)|(methods?)|(methodology))\\b",
+      "(?im)^\\s*(\\d+[\\.\\)]?\\s*)?((experimental\\s+procedures?)|(study\\s+population)|(participants?\\s+and\\s+methods?))\\b",
+      "(?im)^\\s*(\\d+[\\.\\)]?\\s*)?((materiales\\s+y\\s+m[eé]todos)|(m[eé]todos))\\b"
+    ],
+    "results": [
+      "(?im)^\\s*(\\d+[\\.\\)]?\\s*)?(results?|resultados)\\b"
+    ],
+    "discussion": [
+      "(?im)^\\s*(\\d+[\\.\\)]?\\s*)?(discussion|discusi[oó]n)\\b"
+    ],
+    "conclusion": [
+      "(?im)^\\s*(\\d+[\\.\\)]?\\s*)?(conclusions?|conclusiones?)\\b"
+    ],
+    "references": [
+      "(?im)^\\s*(references|referencias|bibliography|literature\\s+cited)\\b"
+    ],
+    "other": []
+  }
+}

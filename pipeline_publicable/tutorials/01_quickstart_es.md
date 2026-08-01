@@ -26,16 +26,12 @@ Base de articulos completa.xlsx
 Ejecutar desde la carpeta raíz del proyecto:
 
 ```bash
-/Users/drux/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 \
+python3 \
   pipeline_publicable/run_pipeline_publicable.py \
+  --protocol config/protocols/contaminantes-enfermedades-neurodegenerativas \
   --input-dir Articulos \
   --output-dir outputs/review_miner_publication \
-  --metadata "ArticulosTotales.xlsx,Base de articulos completa.xlsx" \
-  --contaminants config/review_miner_contaminants.json \
-  --diseases config/review_miner_diseases.json \
-  --k 4 \
-  --sample-size 200 \
-  --kwic-radius 160
+  --metadata "ArticulosTotales.xlsx,Base de articulos completa.xlsx"
 ```
 
 ## 3. Qué hace el comando

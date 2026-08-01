@@ -12,8 +12,9 @@ Two responsibilities:
   * :func:`summarize_entity` aggregates every mention of a given entity
     inside one article into an :class:`EntitySummary`. The role assigned to
     the entity is one of seven generic IDs that apply equally to Variable A
-    or Variable B — the human display label is resolved later by the UI /
-    report layer from the protocol.
+    or Variable B. Those IDs stay the machine key everywhere; :data:`ROLE_LABELS_ES`
+    and :func:`role_label_es` are the one place that turns them into the
+    Spanish phrase the human-facing exports print.
 """
 
 from __future__ import annotations
@@ -272,3 +273,37 @@ ROLE_IDS = (
     ROLE_REVIEW_MENTION,
     ROLE_UNCLEAR,
 )
+
+
+# --------------------------------------------------------------------------- #
+# Human-readable role labels                                                  #
+# --------------------------------------------------------------------------- #
+#
+# The role IDs above are the stable machine key: code branches on them and
+# they are the join key between the exported tables and the manual-validation
+# codebook, so they are never renamed nor translated in place. This is the
+# single place where an ID becomes a phrase a reviewer can read, so the tables
+# a human opens (systematic_review_table, and the parallel `role_label` column
+# next to the raw `role`) all say the same thing. The wording matches the
+# vocabulary of `_study_context` above: Spanish, no accents, one short phrase.
+
+ROLE_LABELS_ES: dict[str, str] = {
+    ROLE_PRIMARY_FOCUS: "Foco principal del estudio",
+    ROLE_PROBABLE_FOCUS: "Foco probable del estudio",
+    ROLE_SECONDARY: "Variable secundaria o contexto analitico",
+    ROLE_INTRO_DISCUSSION: "Mencion solo en introduccion o discusion",
+    ROLE_BIBLIOGRAPHIC: "Mencion solo bibliografica",
+    ROLE_REVIEW_MENTION: "Mencion en revision o sintesis",
+    ROLE_UNCLEAR: "Rol no determinado",
+}
+
+
+def role_label_es(role_id: str) -> str:
+    """Human-readable Spanish label for a role ID.
+
+    An unknown ID is returned verbatim instead of being hidden behind a
+    generic label: a role that reaches an export without a translation must
+    be visible, not silently relabelled as "unclear".
+    """
+
+    return ROLE_LABELS_ES.get(role_id, role_id)

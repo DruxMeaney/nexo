@@ -50,7 +50,7 @@ La fortaleza del metodo no es que el algoritmo cuente mas rapido que una persona
 
 ## Guia diapositiva por diapositiva
 ### Diapositiva 1. Portada y escala del analisis
-![Diapositiva 1](/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes/outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-01.png)
+![Diapositiva 1](../outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-01.png)
 **Idea central:** La diapositiva abre con el alcance del estudio: 79 articulos, 14,739 menciones y 936 relaciones con evidencia.
 
 **Guion breve:** Esta primera diapositiva establece el tamano del corpus y la logica del trabajo. No estamos mostrando opiniones ni asociaciones inventadas, sino una estructura de evidencia rastreable desde cada grafica hasta fragmentos textuales de los articulos.
@@ -74,7 +74,7 @@ La fortaleza del metodo no es que el algoritmo cuente mas rapido que una persona
 - No digas que 936 relaciones equivalen a 936 pruebas causales. Son relaciones textuales con evidencia, clasificadas por nivel de confianza.
 
 ### Diapositiva 2. Algoritmo de conteo de palabras con contexto
-![Diapositiva 2](/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes/outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-02.png)
+![Diapositiva 2](../outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-02.png)
 **Idea central:** El pipeline transforma PDFs o textos cientificos en salidas auditables mediante tres bloques: preparacion, deteccion y conteo, y salidas estructuradas.
 
 **Guion breve:** Aqui esta el corazon metodologico. Primero se cuenta de manera objetiva, pero despues el algoritmo pregunta donde aparece la mencion, que palabras la rodean y si existe lenguaje de exposicion, medicion o asociacion. Por eso no tratamos igual una palabra en referencias que una palabra en metodos o resultados.
@@ -98,7 +98,7 @@ La fortaleza del metodo no es que el algoritmo cuente mas rapido que una persona
 - El algoritmo no entiende como un humano completo. Usa reglas explicitas de contexto. Esa es una ventaja para auditoria, porque se puede revisar por que tomo cada decision.
 
 ### Diapositiva 3. De mencion cruda a decision contextual
-![Diapositiva 3](/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes/outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-03.png)
+![Diapositiva 3](../outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-03.png)
 **Idea central:** Una palabra detectada se convierte en una clasificacion solo despues de revisar seccion, ventana textual, pistas y negacion.
 
 **Guion breve:** Esta diapositiva responde a la pregunta mas importante: como evita el algoritmo falsos positivos. La palabra por si sola no decide. El sistema conserva la oracion, revisa si la mencion esta en una seccion fuerte y busca pistas como exposure, dose, measured, risk, associated o not.
@@ -123,7 +123,7 @@ La fortaleza del metodo no es que el algoritmo cuente mas rapido que una persona
 - Si el fragmento no respalda la relacion, la salida debe quedar como evidencia insuficiente.
 
 ### Diapositiva 4. Menciones totales por contaminante
-![Diapositiva 4](/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes/outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-04.png)
+![Diapositiva 4](../outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-04.png)
 **Idea central:** La grafica muestra cuantas veces aparece cada contaminante en el corpus, no cuantos articulos estudian ese contaminante.
 
 **Guion breve:** Este grafico es una capa basal. Si aluminio aparece muchas veces, significa que el termino fue mencionado muchas veces en el corpus; no significa automaticamente que 1,237 articulos lo estudiaron ni que todos los articulos lo trabajaron experimentalmente.
@@ -149,7 +149,7 @@ La fortaleza del metodo no es que el algoritmo cuente mas rapido que una persona
 - No confundas menciones con numero de articulos.
 
 ### Diapositiva 5. Menciones totales de contaminantes por seccion
-![Diapositiva 5](/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes/outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-05.png)
+![Diapositiva 5](../outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-05.png)
 **Idea central:** La seccion revela donde se concentra el lenguaje sobre contaminantes y permite distinguir evidencia central de menciones perifericas.
 
 **Guion breve:** La seccion es el primer filtro de calidad. Si un contaminante aparece mucho en resultados o metodos, es mas probable que este relacionado con el analisis del estudio. Si aparece sobre todo en referencias, probablemente sea una mencion bibliografica y requiere mas cautela.
@@ -174,7 +174,7 @@ La fortaleza del metodo no es que el algoritmo cuente mas rapido que una persona
 - Algunas revisiones tienen muchas referencias y pueden concentrar terminos alli.
 
 ### Diapositiva 6. Distribucion por seccion de los 25 contaminantes con mas menciones
-![Diapositiva 6](/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes/outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-06.png)
+![Diapositiva 6](../outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-06.png)
 **Idea central:** El heatmap muestra el perfil seccional de cada contaminante y ayuda a detectar si su presencia es experimental, narrativa o bibliografica.
 
 **Guion breve:** Esta figura mejora la lectura del grafico anterior porque ya no solo sabemos que seccion tiene mas menciones, sino que contaminante esta generando ese patron. Por ejemplo, un contaminante concentrado en referencias debe auditarse con mas cuidado que uno concentrado en metodos/resultados.
@@ -199,7 +199,7 @@ La fortaleza del metodo no es que el algoritmo cuente mas rapido que una persona
 - Debe interpretarse junto con rol del contaminante, evidencia textual y tipo de estudio.
 
 ### Diapositiva 7. Numero de articulos donde el contaminante fue relevante
-![Diapositiva 7](/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes/outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-07.png)
+![Diapositiva 7](../outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-07.png)
 **Idea central:** Esta grafica cambia la unidad de analisis: pasa de menciones totales a articulos unicos.
 
 **Guion breve:** Aqui ya no preguntamos cuantas veces aparece una palabra, sino en cuantos articulos aparece. Por eso esta figura responde mejor a una pregunta de revision sistematica: que contaminantes estan distribuidos en mas documentos del corpus.
@@ -224,7 +224,7 @@ La fortaleza del metodo no es que el algoritmo cuente mas rapido que una persona
 - Debe cruzarse con el rol: exposicion principal, variable secundaria, revision o solo mencion.
 
 ### Diapositiva 8. Frecuencia de enfermedades, nivel de asociacion y tipo de estudio
-![Diapositiva 8](/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes/outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-08.png)
+![Diapositiva 8](../outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-08.png)
 **Idea central:** La diapositiva resume tres dimensiones del corpus: enfermedades detectadas, fuerza de asociacion y contexto de estudio.
 
 **Guion breve:** Esta diapositiva le da contexto a toda la analitica. No solo importa que contaminantes aparecen, sino con que enfermedades se vinculan, con que nivel de evidencia textual y en que tipo de estudio se reportan.
@@ -249,7 +249,7 @@ La fortaleza del metodo no es que el algoritmo cuente mas rapido que una persona
 - El tipo de estudio afecta la interpretacion: una revision, un estudio epidemiologico y un ensayo in vitro no tienen el mismo peso metodologico.
 
 ### Diapositiva 9. Matriz basal contaminante-enfermedad
-![Diapositiva 9](/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes/outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-09.png)
+![Diapositiva 9](../outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-09.png)
 **Idea central:** La matriz convierte relaciones articulo-entidad en un mapa de calor de pares contaminante-enfermedad.
 
 **Guion breve:** Esta matriz es un mapa de densidad, no una prueba causal. Una celda alta significa que ese par aparece repetidamente con evidencia textual en el corpus. La interpretacion fuerte viene despues, cuando revisamos seccion, confianza y fragmentos de evidencia.
@@ -274,7 +274,7 @@ La fortaleza del metodo no es que el algoritmo cuente mas rapido que una persona
 - Una celda alta puede reflejar articulos de revision o lenguaje general.
 
 ### Diapositiva 10. Agregacion por categoria y peso de evidencia
-![Diapositiva 10](/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes/outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-10.png)
+![Diapositiva 10](../outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-10.png)
 **Idea central:** La matriz ponderada combina fuerza de asociacion y confianza para comparar familias de contaminantes.
 
 **Guion breve:** Esta diapositiva mejora la matriz basal porque no todas las relaciones valen igual. Una relacion fuerte y de alta confianza pesa mas que una mencion especulativa. Asi obtenemos una priorizacion mas util para decidir que pares auditar primero.
@@ -300,7 +300,7 @@ La fortaleza del metodo no es que el algoritmo cuente mas rapido que una persona
 - Conviene reportar los pesos como decision metodologica auditable y, si se publica, hacer analisis de sensibilidad.
 
 ### Diapositiva 11. Grafico de burbujas
-![Diapositiva 11](/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes/outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-11.png)
+![Diapositiva 11](../outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-11.png)
 **Idea central:** La burbuja separa volumen de evidencia y fuerza promedio para cada par contaminante-enfermedad.
 
 **Guion breve:** Esta figura ayuda a no confundir cantidad con fuerza. Una burbuja grande puede deberse a muchas relaciones moderadas, mientras que una burbuja mas pequena pero oscura puede indicar pocas relaciones con mayor fuerza promedio.
@@ -325,7 +325,7 @@ La fortaleza del metodo no es que el algoritmo cuente mas rapido que una persona
 - Debe revisarse el fragmento textual asociado antes de redactar conclusiones cientificas.
 
 ### Diapositiva 12. Red bipartita
-![Diapositiva 12](/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes/outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-12.png)
+![Diapositiva 12](../outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-12.png)
 **Idea central:** La red muestra como se conectan contaminantes y enfermedades mediante relaciones con evidencia textual.
 
 **Guion breve:** La red es una forma de ver estructura. No solo nos dice que pares son frecuentes, sino que contaminantes funcionan como conectores transversales a multiples desenlaces neurodegenerativos.
@@ -350,7 +350,7 @@ La fortaleza del metodo no es que el algoritmo cuente mas rapido que una persona
 - El grado alto no implica mayor causalidad.
 
 ### Diapositiva 13. Contexto por seccion como filtro contra falsos positivos
-![Diapositiva 13](/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes/outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-13.png)
+![Diapositiva 13](../outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-13.png)
 **Idea central:** La seccion del articulo es una variable de calidad para interpretar asociaciones.
 
 **Guion breve:** Esta figura es central para defender el control de falsos positivos. Si una relacion aparece en metodos o resultados, tiene una lectura distinta a una relacion que aparece solo en referencias. Por eso el pipeline no solo detecta entidades; tambien conserva la seccion.
@@ -375,7 +375,7 @@ La fortaleza del metodo no es que el algoritmo cuente mas rapido que una persona
 - El peso por seccion es una regla metodologica del pipeline y debe declararse como tal.
 
 ### Diapositiva 14. Pares prioritarios
-![Diapositiva 14](/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes/outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-14.png)
+![Diapositiva 14](../outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-14.png)
 **Idea central:** La clasificacion ordena los pares contaminante-enfermedad que conviene auditar primero.
 
 **Guion breve:** Esta figura convierte el analisis en una agenda de revision. Los pares de arriba no son conclusiones finales, sino candidatos para auditoria manual: revisar articulos, secciones y fragmentos de evidencia antes de redactar inferencias cientificas.
@@ -401,7 +401,7 @@ La fortaleza del metodo no es que el algoritmo cuente mas rapido que una persona
 - Siempre revisar score y n_relations juntos para evitar sobreinterpretar outliers.
 
 ### Diapositiva 15. PCA + K-Means exploratorio, y nota de actualizacion a K-Means
-![Diapositiva 15](/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes/outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-15.png)
+![Diapositiva 15](../outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-15.png)
 **Idea central:** La diapositiva original muestra clustering exploratorio de articulos; la version actual del pipeline ya fue ajustada para usar K-Means sin PCA.
 
 **Guion breve:** Esta figura no busca demostrar relaciones causales. Su funcion es agrupar articulos por perfiles similares para hacer triage: articulos con patrones parecidos de contaminantes, enfermedades, secciones y asociaciones pueden revisarse juntos.
@@ -428,7 +428,7 @@ La fortaleza del metodo no es que el algoritmo cuente mas rapido que una persona
 - No digas que los clusters prueban asociaciones contaminante-enfermedad. Agrupan articulos, no pares causales.
 
 ### Diapositiva 16. Recomendacion metodologica
-![Diapositiva 16](/Users/drux/Documents/Drux/1_UNAM_FESI/RevisionContaminantes/outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-16.png)
+![Diapositiva 16](../outputs/manual-analitica-guide/presentations/analitica-contaminantes/template-inspect/source-slides/source-slide-16.png)
 **Idea central:** La estrategia mas defendible es reglas auditables ahora y aprendizaje supervisado despues, cuando existan etiquetas humanas.
 
 **Guion breve:** La razon para empezar con reglas y NLP es la auditoria. En una revision sistematica necesitamos justificar cada decision. Mas adelante, cuando tengamos etiquetas humanas, podemos entrenar un modelo supervisado para aprender patrones mas complejos, pero sin perder trazabilidad.

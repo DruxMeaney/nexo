@@ -1,0 +1,28 @@
+Arsenic exposure and Parkinson disease among patients of two referral hospitals
+
+Abstract: We examined whether arsenic exposure is associated with Parkinson disease among
+340 patients recruited in two referral hospitals between 2015 and 2019, using drinking
+water measurements collected by the regional environmental agency.
+
+Introduction
+Arsenic is a widespread pollutant of groundwater in the northern districts of the study
+region. Chronic ingestion has been described as a determinant of peripheral neuropathy
+and of movement disorders in exposed populations.
+
+Methods
+Patients were interviewed at recruitment and household water samples were collected on
+the same day. Arsenic concentrations were quantified by hydride generation atomic
+absorption spectrometry.
+
+Results
+Arsenic concentrations above 10 ug/l were recorded in the household supply of 41
+patients, and the median concentration in that subgroup was more than four times the
+guideline value.
+
+Discussion. This study reveals that arsenic exposure is associated with Parkinson disease
+in a clinical population, and the association persisted after adjustment for age, sex and
+years of residence in the district.
+
+References
+1. Aguilar R, Peña L. Groundwater arsenic in the northern basin. Water Res. 2018;44:12-30.
+2. Novak P. Movement disorders and trace elements. Neurotoxicology. 2020;77:200-214.

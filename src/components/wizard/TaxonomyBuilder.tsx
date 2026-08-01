@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { FolderPlus, Plus, Upload } from "lucide-react";
+import { CheckCircle2, FolderPlus, Plus, Upload } from "lucide-react";
 import {
   countCategories,
   countTerms,
@@ -10,7 +10,7 @@ import {
   insertNode
 } from "@/lib/protocol/draft";
 import { variableFromJson } from "@/lib/protocol/format";
-import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { pickLabel, type Dictionary } from "@/lib/i18n/dictionaries";
 import { pluralize } from "@/lib/i18n/format";
 import type { ProtocolVariable, TaxonomyNode } from "@/lib/protocol/types";
 import { TaxonomyNodeRow } from "./TaxonomyNodeRow";
@@ -46,6 +46,7 @@ export function TaxonomyBuilder({
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [importDone, setImportDone] = useState(false);
   const { mode } = variable.metadata;
 
   function addRootTerm() {
@@ -58,6 +59,7 @@ export function TaxonomyBuilder({
 
   function triggerImport() {
     setImportError(null);
+    setImportDone(false);
     fileInputRef.current?.click();
   }
 
@@ -85,7 +87,11 @@ export function TaxonomyBuilder({
         },
         nodes: imported.nodes
       });
+      // Reemplazar el árbol completo se siente destructivo: sin confirmación
+      // el usuario no sabe si el archivo se leyó o si no pasó nada.
+      setImportDone(true);
     } catch (error) {
+      setImportDone(false);
       const code = error instanceof Error ? error.message : "import_unknown";
       if (code === "invalid_json") {
         setImportError(t.wizard.importErrorInvalidJson);
@@ -105,9 +111,13 @@ export function TaxonomyBuilder({
       <header className="taxonomy-builder-header">
         <div>
           <h4>
-            {variable.metadata.displayNameEs ||
-              variable.metadata.displayNameEn ||
-              importButtonLabel}
+            {/* Solo uno de los dos nombres es obligatorio: se muestra el del
+                idioma activo y, si falta, el del otro idioma. */}
+            {pickLabel(
+              t.localeCode,
+              variable.metadata.displayNameEs,
+              variable.metadata.displayNameEn
+            ) || importButtonLabel}
           </h4>
           <p className="help-text" style={{ marginTop: 4 }}>
             {pluralize(categoryCount, t.wizard.taxonomy.summaryCategories, t.wizard.taxonomy.summaryCategoriesSingular)}
@@ -136,6 +146,15 @@ export function TaxonomyBuilder({
         <div className="notice notice-danger" role="alert">
           <strong>{t.wizard.importError}</strong>
           <p style={{ margin: 0 }}>{importError}</p>
+        </div>
+      ) : null}
+
+      {importDone ? (
+        <div className="notice" role="status">
+          <p style={{ margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+            <CheckCircle2 size={16} color="var(--olive)" aria-hidden="true" />
+            {t.wizard.importSuccess}
+          </p>
         </div>
       ) : null}
 

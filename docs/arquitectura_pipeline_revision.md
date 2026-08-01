@@ -82,11 +82,10 @@ RevisionContaminantes/
 ## Ejecucion
 
 ```bash
-/Users/drux/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 run_review_miner.py \
+python3 run_review_miner.py \
+  --protocol config/protocols/contaminantes-enfermedades-neurodegenerativas \
   --input-dir Articulos \
   --metadata "ArticulosTotales.xlsx,Base de articulos completa.xlsx" \
-  --contaminants config/review_miner_contaminants.json \
-  --diseases config/review_miner_diseases.json \
   --output-dir outputs/review_miner
 ```
 

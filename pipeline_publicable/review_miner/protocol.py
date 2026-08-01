@@ -28,6 +28,12 @@ review (contaminants/diseases, drugs/adverse-effects, species/ecosystems...).
 JSON keys are accepted in either camelCase (the format the wizard writes)
 or snake_case (matching the legacy `review_miner_*.json` files). This lets
 human-edited files coexist with wizard exports.
+
+Two loaded fields are provenance, not parameters: `identity.corpus_language`
+and `VariableInfo.mode`. They describe the protocol for the reader and are
+written into the run's provenance block, but no stage of the pipeline branches
+on them — see the docstrings of :class:`ProtocolIdentity` and
+:class:`VariableInfo`.
 """
 
 from __future__ import annotations
@@ -113,6 +119,18 @@ CUE_FILENAMES: dict[str, str] = {
 
 @dataclass
 class ProtocolIdentity:
+    """Who wrote the protocol and what corpus it describes.
+
+    ``corpus_language`` is REGISTERED FOR PROVENANCE, NOT USED BY THE
+    ALGORITHM. No stage of the pipeline branches on it: term patterns and
+    cue patterns are supplied by the protocol itself and are bilingual by
+    construction, so extraction, scoring and classification behave
+    identically for ``"es"``, ``"en"`` and ``"bilingual"``. The field is
+    written to the run's provenance block (`export.export_all`) so a reader
+    of the exported results knows what the author declared the corpus to be,
+    and so the same declaration can be quoted in a Methods section.
+    """
+
     name: str = ""
     description: str = ""
     author: str = ""
@@ -121,10 +139,22 @@ class ProtocolIdentity:
 
 @dataclass
 class VariableInfo:
+    """Display metadata for one variable slot.
+
+    ``mode`` (``"flat"`` | ``"hierarchical"``) is REGISTERED FOR PROVENANCE,
+    NOT USED BY THE ALGORITHM. It is a wizard-editing concern: it decides
+    whether the UI offers an "add category" button. The loader reads the
+    taxonomy exactly as written — a tree with no category nodes flattens to
+    root-level terms whatever the declared mode — so a run cannot be
+    reproduced differently by changing it. It is exported with the run so
+    the reader can tell a deliberately flat taxonomy from a hierarchical one
+    that happens to have no categories yet.
+    """
+
     slot: str  # "a" or "b"
     display_name_es: str
     display_name_en: str
-    mode: str  # "flat" | "hierarchical"
+    mode: str  # "flat" | "hierarchical" — provenance only, see class docstring
 
     @property
     def display_name(self) -> str:

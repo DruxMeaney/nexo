@@ -1,0 +1,21 @@
+Neuronal cell cultures exposed to a heavy metal and markers of neurodegeneration in vitro
+
+Abstract
+Differentiated neuronal cultures were treated for twenty four hours and the viability,
+the oxidative stress markers and the processing of the amyloid precursor protein were
+quantified.
+
+Methods
+Cells were maintained in a humidified incubator and differentiated with retinoic acid
+before treatment. Each condition was run in six independent wells.
+
+Results
+Lead acetate reduced cell viability by thirty eight per cent after twenty four hours of
+treatment. The reduction followed a monotonic trend across the four concentrations that
+were assayed, and the same trend was observed in the two independent differentiation
+batches. Reactive oxygen species accumulated in parallel, and the mitochondrial membrane
+potential fell in the two highest conditions. Markers of Alzheimer pathology increased in
+the treated wells and the increase was significantly larger than in the vehicle control.
+
+References
+1. Ibarra M. Neuronal differentiation protocols. J Cell Methods. 2016;22:14-29.

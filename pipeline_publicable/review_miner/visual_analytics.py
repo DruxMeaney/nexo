@@ -808,6 +808,22 @@ def _normalize_pivot_keys(relations: pd.DataFrame) -> pd.DataFrame:
     return frame
 
 
+def _relative_to_run(path: Path | str, output_dir: Path) -> str:
+    """Render ``path`` relative to the run folder, with ``/`` separators.
+
+    Falls back to the plain string when the figure somehow lives outside the
+    run folder: a summary that names an unexpected location is more useful to
+    whoever debugs it than one that hides the surprise behind an exception.
+    The separator is forced so a run produced on Windows and one produced on
+    Linux describe the same figure with the same string.
+    """
+
+    try:
+        return Path(path).resolve().relative_to(Path(output_dir).resolve()).as_posix()
+    except ValueError:
+        return str(path)
+
+
 def run_visual_analytics(
     protocol: Protocol,
     input_dir: str | Path,
@@ -958,7 +974,13 @@ def run_visual_analytics(
             "variable_a": name_a,
             "variable_b": name_b,
         },
-        "outputs": {key: str(value) for key, value in outputs.items()},
+        # Recorded RELATIVE to the run folder. An absolute path names the
+        # machine that produced the run, so it both leaks the author's
+        # directory layout into a published artifact and makes this the one
+        # file that cannot be byte-compared between two runs of the same
+        # study. A relative path still resolves for any consumer, since every
+        # figure lives under this same folder.
+        "outputs": {key: _relative_to_run(value, output_dir) for key, value in outputs.items()},
         "interpretation_warning": "K-Means es exploratorio; no prueba causalidad ni sustituye revision manual de evidence_text.",
     }
     (output_dir / "visual_analytics_summary.json").write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")

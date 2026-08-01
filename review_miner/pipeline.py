@@ -9,6 +9,7 @@ no domain-specific defaults left in the orchestrator.
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 from .classify import detect_article_kind, summarize_entity
@@ -69,6 +70,8 @@ def run_pipeline(
             )
         )
 
+    _warn_if_nothing_was_found(articles, all_mentions, all_relations)
+
     table_paths = export_all(output_dir, articles, all_mentions, all_summaries, all_relations, protocol)
     chart_paths = build_visualizations(output_dir, articles, all_summaries, all_relations, protocol)
     return {
@@ -79,3 +82,37 @@ def run_pipeline(
         "table_paths": table_paths,
         "chart_paths": chart_paths,
     }
+
+
+def _warn_if_nothing_was_found(
+    articles: list[Article],
+    mentions: list[Mention],
+    relations: list[Relation],
+) -> None:
+    """Say out loud when a completed run carries no findings.
+
+    A protocol whose patterns match nothing exports well-formed empty tables
+    and exits 0 — indistinguishable, to a verifier following the manuscript,
+    from a genuine negative result. The warning goes to stderr because stdout
+    carries the run's own report.
+    """
+
+    if not articles:
+        return  # `io.discover_input_files` already warned about the folder.
+    if not mentions:
+        print(
+            f"[pipeline] AVISO: 0 menciones en {len(articles)} articulo(s): ningun patron "
+            "del lexico coincidio con el corpus. Revisa los patrones del protocolo antes "
+            "de interpretar este resultado como un hallazgo negativo.",
+            file=sys.stderr,
+            flush=True,
+        )
+        return
+    if not relations:
+        print(
+            f"[pipeline] AVISO: {len(mentions)} menciones pero 0 relaciones A-B con "
+            "evidencia textual: ninguna pareja de variables co-ocurrio dentro de la "
+            "distancia configurada (analysis.relationDistance).",
+            file=sys.stderr,
+            flush=True,
+        )

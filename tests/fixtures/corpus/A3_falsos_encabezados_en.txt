@@ -1,0 +1,27 @@
+Cadmium in urban soils and Alzheimer disease among older adults living near smelters
+
+Abstract
+Soil cadmium concentrations were measured in eighteen urban districts and linked to the
+cognitive test scores of residents living within two kilometres of an active smelter.
+
+Introduction
+Cadmium is released by smelting and by battery recycling. Earlier national surveys noted
+results from the soil monitoring programme show a wide variation between districts, and
+that pattern complicates any direct comparison across cities of different size. A single
+method yields crucial data for public health decision makers and allows every district to
+be ranked by its estimated exposure. Alzheimer disease has been reported more frequently
+in industrial districts, although the available evidence remains fragmentary.
+
+Methods
+Composite soil samples were collected at five points per district and digested in nitric
+acid before quantification.
+
+Results
+Cadmium concentrations ranged from 0,4 to 6,8 mg/kg and exceeded the intervention value
+in three districts.
+
+References
+1. Kessler RC, Andrews G, Mroczek D. The World Health Organization composite diagnostic
+interview short form. Int J
+Methods Psychiatr Res 1993;3:1-28.
+2. Larsen T. Soil cadmium and urban exposure pathways. Sci Total Environ. 2017;590:88-99.

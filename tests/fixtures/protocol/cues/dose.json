@@ -1,0 +1,6 @@
+{
+  "id": "dose",
+  "patterns": [
+    "\\b\\d+(?:[\\.,]\\d+)?\\s*(mg/l|ug/l|µg/l|μg/l|ppm|ppb|mg/kg|µm|μm|um)\\b"
+  ]
+}

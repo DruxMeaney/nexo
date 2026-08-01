@@ -1,0 +1,37 @@
+Exposición a plomo en una cohorte de adultos mayores y enfermedad de Alzheimer
+
+Resumen
+Se evaluó la relación entre la exposición a plomo y la enfermedad de Alzheimer en una
+cohorte comunitaria de adultos mayores seguida durante ocho años. Los niveles de plomo
+en sangre se midieron al inicio del seguimiento y el diagnóstico clínico se confirmó de
+forma independiente por dos neurólogos.
+
+Introducción
+El plomo es un contaminante ambiental persistente que se acumula en el tejido óseo
+durante décadas. Los trabajos previos describen alteraciones de la memoria de trabajo
+en adultos con exposición ocupacional prolongada. La enfermedad de Alzheimer es la
+causa más frecuente de demencia en la población de más de sesenta y cinco años.
+
+Materiales y métodos
+Se reclutaron mil doscientos participantes en tres centros de atención primaria. Las
+concentraciones de plomo en sangre se determinaron por espectrometría de absorción
+atómica, con un límite de detección de 0,5 ug/l. El seguimiento clínico se realizó de
+forma anual mediante una batería neuropsicológica estandarizada.
+
+Resultados
+La exposición a plomo se asoció significativamente con la enfermedad de Alzheimer en el
+modelo ajustado por edad, sexo y escolaridad, con un mayor riesgo en el tercil superior
+de exposición.
+
+Discusión
+Nuestros hallazgos concuerdan con los estudios previos que describen deterioro cognitivo
+en trabajadores expuestos a plomo. El diseño observacional impide establecer causalidad
+directa.
+
+Conclusiones
+La exposición acumulada a plomo se asocia con la enfermedad de Alzheimer en esta cohorte
+comunitaria y justifica programas de vigilancia ambiental.
+
+Referencias
+1. Gómez A, Ruiz B. Metales pesados y deterioro cognitivo. Rev Salud Pública. 2019;12:44-58.
+2. Smith J, Turner K. Lead and dementia in older workers. Environ Health. 2021;30:110-125.
